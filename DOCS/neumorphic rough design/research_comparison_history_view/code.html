@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Research History</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecd6",
+                        "background-light": "#E0E5EC", 
+                        "background-dark": "#2d333b",
+                        "neu-light": "#ffffff",
+                        "neu-dark": "#a3b1c6",
+                        "text-main": "#4a5568",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'neu-flat': '9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5)',
+                        'neu-pressed': 'inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8)',
+                        'neu-button': '6px 6px 10px 0 rgba(163,177,198, 0.7), -6px -6px 10px 0 rgba(255,255,255, 0.8)',
+                        'neu-button-active': 'inset 4px 4px 8px 0 rgba(163,177,198, 0.7), inset -4px -4px 8px 0 rgba(255,255,255, 0.8)',
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #E0E5EC;
+        }
+        .neu-card {
+            background: #E0E5EC;
+            box-shadow: 9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5);
+            border-radius: 20px;
+        }
+        .neu-btn {
+            background: #E0E5EC;
+            box-shadow: 6px 6px 10px 0 rgba(163,177,198, 0.7), -6px -6px 10px 0 rgba(255,255,255, 0.8);
+            border-radius: 50px;
+            transition: all 0.2s ease-in-out;
+        }
+        .neu-btn:hover {
+            transform: translateY(-2px);
+        }
+        .neu-btn:active, .neu-btn.active {
+            box-shadow: inset 4px 4px 8px 0 rgba(163,177,198, 0.7), inset -4px -4px 8px 0 rgba(255,255,255, 0.8);
+            transform: translateY(0);
+        }
+        .neu-input {
+            background: #E0E5EC;
+            box-shadow: inset 5px 5px 10px #b8b9be, inset -5px -5px 10px #ffffff;
+            border-radius: 50px;
+            border: none;
+        }
+        .neu-icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #E0E5EC;
+            box-shadow: 5px 5px 10px #b8b9be, -5px -5px 10px #ffffff;
+            color: #4a5568;
+            transition: all 0.2s ease;
+        }
+        .neu-icon-btn:hover {
+            color: #13ecd6;
+        }
+    </style>
+</head>
+<body class="font-display text-text-main h-screen overflow-hidden flex flex-col">
+<!-- Header -->
+<header class="flex items-center justify-between px-8 py-4 z-20 relative bg-[#E0E5EC]">
+<div class="flex items-center gap-4">
+<div class="neu-btn w-10 h-10 flex items-center justify-center rounded-xl text-primary">
+<span class="material-symbols-outlined">science</span>
+</div>
+<h2 class="text-text-main text-xl font-bold tracking-tight">Research Dashboard</h2>
+</div>
+<div class="flex-1 max-w-xl mx-8">
+<div class="relative w-full">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-500">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="neu-input w-full py-3 pl-12 pr-4 text-gray-700 focus:outline-none placeholder-gray-500" placeholder="Search past analysis, papers, or topics..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="neu-btn px-4 py-2 text-sm font-bold text-gray-700 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">notifications</span>
+</button>
+<div class="flex items-center gap-3">
+<div class="neu-card w-10 h-10 rounded-full flex items-center justify-center overflow-hidden border-2 border-[#E0E5EC]">
+<img alt="Profile avatar of a researcher" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAep9Z6DNvizncJQoyT-W7omJxu5Ysh6zTVy5jnQV6ZxC7JM9OsukRWWptJNXvXGhVJYyb7sbeey5clB4XvA2KjUO5LNMwt9aWoSgsH8cdTQ-RZol3Xfy84uq1OfJesheBj5WFpPKWVWUm11FVPjKsYgs3WoUL9EEWmgWcE5HbGrNrfAHeCwJyGqB1whPexR79U-ZVjLfYD5D-toYKnwzy8bQlMshCghuVHHA3aFYhwPl16TrLVTxGxq1NJ9O_E_jIbO7cmajhcsZa"/>
+</div>
+<div class="hidden md:block">
+<p class="text-sm font-bold text-gray-800">Dr. Smith</p>
+<p class="text-xs text-gray-500">Lead Researcher</p>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 flex flex-col justify-between py-6 pl-6 pr-2 z-10">
+<nav class="flex flex-col gap-4">
+<a class="neu-btn px-4 py-3 flex items-center gap-3 text-gray-600 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Live Dashboard</span>
+</a>
+<!-- Active/Pressed State -->
+<a class="neu-btn active px-4 py-3 flex items-center gap-3 text-primary" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-bold">History</span>
+</a>
+<a class="neu-btn px-4 py-3 flex items-center gap-3 text-gray-600 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-medium">Knowledge Graph</span>
+</a>
+<a class="neu-btn px-4 py-3 flex items-center gap-3 text-gray-600 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pr-4">
+<div class="neu-card p-4 rounded-xl mb-4">
+<h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Storage</h4>
+<div class="w-full bg-gray-300 rounded-full h-2 mb-2 shadow-inner">
+<div class="bg-primary h-2 rounded-full w-3/4"></div>
+</div>
+<p class="text-xs text-gray-600">75% of 100GB used</p>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto p-6 scroll-smooth">
+<div class="max-w-5xl mx-auto pb-20">
+<!-- Filters & Title -->
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+<div>
+<h1 class="text-3xl font-bold text-gray-800 tracking-tight mb-1">Research Sessions</h1>
+<p class="text-gray-500">Track your previous analysis and comparisons.</p>
+</div>
+<div class="flex gap-4">
+<button class="neu-btn active px-4 py-2 text-sm font-medium text-gray-700 flex items-center gap-2">
+<span>Date</span>
+<span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+</button>
+<button class="neu-btn px-4 py-2 text-sm font-medium text-gray-700 flex items-center gap-2">
+<span>Topic</span>
+<span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+</button>
+<button class="neu-btn px-4 py-2 text-sm font-medium text-gray-700 flex items-center gap-2">
+<span>Team Member</span>
+<span class="material-symbols-outlined text-sm">arrow_drop_down</span>
+</button>
+</div>
+</div>
+<!-- Recent Comparisons Section -->
+<section class="mb-10">
+<h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">compare_arrows</span>
+                        Recent Comparisons
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Comparison Card 1 -->
+<div class="neu-card p-5 relative group">
+<div class="absolute top-4 right-4">
+<button class="neu-icon-btn group-hover:text-primary" title="Re-open comparison">
+<span class="material-symbols-outlined">open_in_new</span>
+</button>
+</div>
+<div class="flex items-center gap-3 mb-3">
+<div class="w-2 h-2 rounded-full bg-green-400"></div>
+<span class="text-xs text-gray-500 font-bold uppercase">Yesterday</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="p-2 rounded bg-gray-100/50 border border-white/50 shadow-sm">
+<p class="text-sm font-medium truncate">Deep Learning in Medical Imaging</p>
+</div>
+<div class="flex justify-center -my-2 z-10">
+<span class="material-symbols-outlined text-gray-400 bg-[#E0E5EC] rounded-full p-1">code</span>
+</div>
+<div class="p-2 rounded bg-gray-100/50 border border-white/50 shadow-sm">
+<p class="text-sm font-medium truncate">CNN Architectures Review 2023</p>
+</div>
+</div>
+</div>
+<!-- Comparison Card 2 -->
+<div class="neu-card p-5 relative group">
+<div class="absolute top-4 right-4">
+<button class="neu-icon-btn group-hover:text-primary" title="Re-open comparison">
+<span class="material-symbols-outlined">open_in_new</span>
+</button>
+</div>
+<div class="flex items-center gap-3 mb-3">
+<div class="w-2 h-2 rounded-full bg-blue-400"></div>
+<span class="text-xs text-gray-500 font-bold uppercase">Oct 24, 2023</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="p-2 rounded bg-gray-100/50 border border-white/50 shadow-sm">
+<p class="text-sm font-medium truncate">Quantum Entanglement Basics</p>
+</div>
+<div class="flex justify-center -my-2 z-10">
+<span class="material-symbols-outlined text-gray-400 bg-[#E0E5EC] rounded-full p-1">code</span>
+</div>
+<div class="p-2 rounded bg-gray-100/50 border border-white/50 shadow-sm">
+<p class="text-sm font-medium truncate">Qubit Stability Analysis</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Session Timeline -->
+<section>
+<h3 class="text-lg font-bold text-gray-700 mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">schedule</span>
+                        Timeline
+                    </h3>
+<div class="flex flex-col gap-8 relative pl-4 border-l-2 border-gray-300 ml-3">
+<!-- Timeline Item 1 -->
+<div class="relative pl-8">
+<!-- Timeline Dot -->
+<div class="absolute -left-[41px] top-6 w-5 h-5 rounded-full bg-[#E0E5EC] border-4 border-primary shadow-md"></div>
+<div class="neu-card p-6 md:p-8">
+<div class="flex flex-col md:flex-row justify-between mb-4">
+<div>
+<h4 class="text-xl font-bold text-gray-800">Nanotech Applications in Oncology</h4>
+<p class="text-sm text-gray-500 mt-1">Session started Oct 26, 09:30 AM • 45 mins duration</p>
+</div>
+<div class="mt-4 md:mt-0 flex gap-2">
+<button class="neu-btn px-4 py-2 text-xs font-bold text-gray-600 hover:text-primary">Export PDF</button>
+<button class="neu-btn px-4 py-2 text-xs font-bold text-gray-600 hover:text-primary">Share</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+<!-- Papers List -->
+<div class="md:col-span-2">
+<h5 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Papers Analyzed</h5>
+<ul class="space-y-3">
+<li class="flex items-start gap-3 p-3 rounded-lg shadow-inner bg-[#E0E5EC]">
+<span class="material-symbols-outlined text-primary mt-0.5">description</span>
+<div>
+<p class="text-sm font-bold text-gray-700">Targeted Drug Delivery Systems</p>
+<p class="text-xs text-gray-500">J. Doe et al., 2023</p>
+</div>
+</li>
+<li class="flex items-start gap-3 p-3 rounded-lg shadow-inner bg-[#E0E5EC]">
+<span class="material-symbols-outlined text-primary mt-0.5">description</span>
+<div>
+<p class="text-sm font-bold text-gray-700">Gold Nanoparticles in Cancer Treatment</p>
+<p class="text-xs text-gray-500">A. Smith, 2022</p>
+</div>
+</li>
+</ul>
+</div>
+<!-- Visual Summary -->
+<div class="flex flex-col gap-4">
+<div>
+<h5 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Research Gap</h5>
+<div class="p-3 rounded-lg bg-red-50 border border-red-100 text-red-800 text-xs leading-relaxed">
+                                                Limited long-term toxicity studies identified in current literature set.
+                                            </div>
+</div>
+<div>
+<h5 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic Map</h5>
+<div class="aspect-video w-full rounded-lg bg-gray-200 overflow-hidden shadow-inner relative">
+<img alt="Abstract network graph visualization on light background" class="w-full h-full object-cover opacity-60 mix-blend-multiply" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUC9IIQKvlxIZWsXZHE-RZIaFuhIl5BtZZeV7SDHfPLoR8bLc2c602NYGRkbPxwqt1yYcOySTcFOxUkJCfUxexgz3oNiEEZ6tg5BJdddyNiXUPWsXYXRZ3gYTCKk7OEssLpjOc-DV0JtOOlu1IeQw9qCO0Ha-_5oozA1YCUTtHu3GBLaG1Lw2TrhaB1MSxtChA2d4W4YJKna9S5T8j_edTJvWs-2FUGn5JkjpqDKfQ8ht0XhJh1vTUZn9czVrc5Ft8CbA50Wzr4R0u"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-500 text-3xl">hub</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Timeline Item 2 -->
+<div class="relative pl-8">
+<!-- Timeline Dot -->
+<div class="absolute -left-[41px] top-6 w-5 h-5 rounded-full bg-[#E0E5EC] border-4 border-gray-400 shadow-md"></div>
+<div class="neu-card p-6 md:p-8">
+<div class="flex flex-col md:flex-row justify-between mb-4">
+<div>
+<h4 class="text-xl font-bold text-gray-800">Renewable Energy Grid Stability</h4>
+<p class="text-sm text-gray-500 mt-1">Session started Oct 24, 02:15 PM • 1h 20m duration</p>
+</div>
+<div class="mt-4 md:mt-0 flex gap-2">
+<button class="neu-btn px-4 py-2 text-xs font-bold text-gray-600 hover:text-primary">Export PDF</button>
+<button class="neu-btn px-4 py-2 text-xs font-bold text-gray-600 hover:text-primary">Share</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
+<!-- Papers List -->
+<div class="md:col-span-2">
+<h5 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Papers Analyzed</h5>
+<ul class="space-y-3">
+<li class="flex items-start gap-3 p-3 rounded-lg shadow-inner bg-[#E0E5EC]">
+<span class="material-symbols-outlined text-primary mt-0.5">description</span>
+<div>
+<p class="text-sm font-bold text-gray-700">Solar Fluctuation Impact Analysis</p>
+<p class="text-xs text-gray-500">M. Green, 2023</p>
+</div>
+</li>
+</ul>
+</div>
+<!-- Visual Summary -->
+<div class="flex flex-col gap-4">
+<div>
+<h5 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Research Gap</h5>
+<div class="p-3 rounded-lg bg-green-50 border border-green-100 text-green-800 text-xs leading-relaxed">
+                                                Strong consensus found on storage requirements. No major gaps.
+                                            </div>
+</div>
+<div>
+<h5 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Topic Map</h5>
+<div class="aspect-video w-full rounded-lg bg-gray-200 overflow-hidden shadow-inner relative">
+<img alt="Data visualization graph on light background" class="w-full h-full object-cover opacity-60 mix-blend-multiply" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBemF6ZBHdeHNebQuH6ADkT_lWudu8juXHrkknJEWh2Rh0CbUXPPxrbu1Xtnv4fzngj60lWTpS9Cuj7CaOw75Z35LovIs6-vNG7uirNo_zd3u53CN8szI1iEemejbO-W8D0Olw8Is809obIjrYIe9KgaGUuoYQvACQxfNAWhEgza_Mvc30ZlHSz13udhB6L0GqFCIJkNYAkBb5xaGxo0k6g9O6Nyyh-_F4sarFrrnPOxzLlk5WVzVDH-4r_i7MymhYWEFl7whDxUl20"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-gray-500 text-3xl">hub</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+<!-- Bottom Actions Bar -->
+<div class="fixed bottom-6 right-8 flex gap-4 z-30">
+<button class="neu-btn px-6 py-3 text-red-400 hover:text-red-500 font-bold text-sm flex items-center gap-2">
+<span class="material-symbols-outlined">delete_sweep</span>
+             Clear History
+        </button>
+<button class="neu-btn px-6 py-3 bg-[#E0E5EC] text-primary font-bold text-sm flex items-center gap-2 border border-primary/20 hover:text-primary/80">
+<span class="material-symbols-outlined">file_download</span>
+             Bulk Export Report
+        </button>
+</div>
+</body></html>

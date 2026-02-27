@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Side-by-Side Paper Comparison View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecda",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102220",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                    boxShadow: {
+                        'neu-flat': '6px 6px 12px #d1d9e6, -6px -6px 12px #ffffff',
+                        'neu-pressed': 'inset 6px 6px 12px #d1d9e6, inset -6px -6px 12px #ffffff',
+                        'neu-icon': '4px 4px 8px #d1d9e6, -4px -4px 8px #ffffff',
+                        'neu-dark-flat': '6px 6px 12px #0c1a18, -6px -6px 12px #142a28',
+                        'neu-dark-pressed': 'inset 6px 6px 12px #0c1a18, inset -6px -6px 12px #142a28',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col overflow-hidden">
+<!-- Header / Navbar -->
+<header class="flex items-center justify-between px-6 py-4 z-20 bg-background-light dark:bg-background-dark relative shadow-sm">
+<div class="flex items-center gap-4">
+<div class="size-10 flex items-center justify-center rounded-xl bg-background-light dark:bg-background-dark shadow-neu-icon dark:shadow-neu-dark-flat text-slate-800 dark:text-slate-200">
+<span class="material-symbols-outlined">compare_arrows</span>
+</div>
+<h1 class="text-xl font-bold tracking-tight">Research Comparison View</h1>
+</div>
+<!-- Center Controls: Sync Scroll -->
+<div class="hidden md:flex items-center gap-4 px-6 py-2 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-pressed dark:shadow-neu-dark-pressed">
+<div class="flex flex-col items-end">
+<span class="text-xs font-bold text-slate-700 dark:text-slate-300">Synchronized Scroll</span>
+<span class="text-[10px] text-slate-500">View papers in parallel</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+</label>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center size-10 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat hover:shadow-neu-pressed dark:hover:shadow-neu-dark-pressed transition-all active:scale-95 text-slate-700 dark:text-slate-200">
+<span class="material-symbols-outlined">download</span>
+</button>
+<button class="flex items-center justify-center size-10 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat hover:shadow-neu-pressed dark:hover:shadow-neu-dark-pressed transition-all active:scale-95 text-slate-700 dark:text-slate-200">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</header>
+<!-- Main Comparison Area -->
+<main class="flex flex-1 relative overflow-hidden p-4 md:p-6 gap-6">
+<!-- Paper A Column -->
+<section class="flex-1 flex flex-col h-full rounded-2xl bg-background-light dark:bg-background-dark shadow-neu-pressed dark:shadow-neu-dark-pressed p-1 overflow-hidden group">
+<div class="flex flex-col h-full overflow-y-auto custom-scrollbar px-4 py-6">
+<!-- Paper Header A -->
+<div class="flex flex-col gap-4 mb-6">
+<div class="flex items-start justify-between">
+<div>
+<div class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/20 text-teal-800 dark:text-teal-200 mb-2">Paper A</div>
+<h2 class="text-2xl font-bold leading-tight text-slate-900 dark:text-white">Attention Is All You Need</h2>
+<p class="text-sm text-slate-500 mt-1">Vaswani et al. • Google Brain • 2017</p>
+</div>
+<button class="size-10 flex-shrink-0 flex items-center justify-center rounded-full bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat hover:text-primary transition-colors" title="Change Paper">
+<span class="material-symbols-outlined">swap_horiz</span>
+</button>
+</div>
+<!-- Macro Stats A -->
+<div class="grid grid-cols-3 gap-3">
+<div class="p-3 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat flex flex-col items-center justify-center text-center">
+<span class="text-xs text-slate-500 uppercase font-bold tracking-wider">BLEU</span>
+<span class="text-lg font-bold text-primary">28.4</span>
+</div>
+<div class="p-3 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat flex flex-col items-center justify-center text-center">
+<span class="text-xs text-slate-500 uppercase font-bold tracking-wider">Params</span>
+<span class="text-lg font-bold text-slate-800 dark:text-slate-200">65M</span>
+</div>
+<div class="p-3 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat flex flex-col items-center justify-center text-center">
+<span class="text-xs text-slate-500 uppercase font-bold tracking-wider">Training</span>
+<span class="text-lg font-bold text-slate-800 dark:text-slate-200">3.5 Days</span>
+</div>
+</div>
+</div>
+<!-- Abstract / Intro -->
+<div class="mb-8">
+<h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">description</span>
+                        Abstract
+                    </h3>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
+                        The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder. The best performing models also connect the encoder and decoder through an attention mechanism. We propose a new simple network architecture, the <span class="bg-primary/20 px-1 rounded">Transformer</span>, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely.
+                    </p>
+</div>
+<!-- Methodology Image A -->
+<div class="mb-8 p-1 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-pressed dark:shadow-neu-dark-pressed">
+<div class="relative w-full aspect-video rounded-lg overflow-hidden bg-white">
+<img alt="Transformer Architecture Diagram" class="w-full h-full object-cover opacity-90" data-alt="Abstract gradient geometric pattern representing transformer architecture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDfcgRYaXfRMGwXBOQROzf997D00kaxFLC0f9bW0EW4_pkpJ1ndNg_H2WXaGpWoiHjNLRsksH0W55xBPMLTcBBKIiJDcv8-gn998E3IKENYKtwP9D-btz_9JUwQu92laqv3Qw25gQ05FZTMX-DawLyteAQW3AF8Bxx6174ymk880_VC4kP1DiokLxODajRZaFqZMoMUB6_b1KM002fiGKPVz9fCOaITglin-J_2Y5fpwzi4a80vxiRNvQUuCDGat9emo6UiYjGLAUu6"/>
+<div class="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Fig 1. Model Architecture</div>
+</div>
+</div>
+<!-- Methodology Text A -->
+<div class="mb-8">
+<h3 class="text-lg font-bold mb-3 text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-xl">psychology</span>
+                        Methodology
+                    </h3>
+<div class="pl-4 border-l-2 border-indigo-200 dark:border-indigo-900">
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm mb-4">
+                            The Transformer follows this overall architecture using stacked self-attention and point-wise, fully connected layers for both the encoder and decoder.
+                        </p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
+<strong class="text-indigo-600 dark:text-indigo-400">Encoder:</strong> The encoder is composed of a stack of N = 6 identical layers. Each layer has two sub-layers. The first is a multi-head self-attention mechanism, and the second is a simple, position-wise fully connected feed-forward network.
+                        </p>
+</div>
+</div>
+<div class="h-20"></div> <!-- Spacer -->
+</div>
+</section>
+<!-- Center Divider & Overlap Indicator -->
+<div class="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 w-16 z-10 flex flex-col items-center justify-center pointer-events-none py-12 hidden md:flex">
+<!-- Vertical Line -->
+<div class="w-2 h-full rounded-full bg-background-light dark:bg-background-dark shadow-neu-pressed dark:shadow-neu-dark-pressed flex flex-col items-center py-4 gap-24 relative">
+<!-- Shared Citation Pill 1 -->
+<div class="absolute top-[20%] z-20 pointer-events-auto cursor-help group/pill">
+<div class="size-8 rounded-full bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/40 transform transition hover:scale-110">
+<span class="text-xs font-bold">14</span>
+</div>
+<div class="absolute left-10 top-0 w-48 bg-white dark:bg-slate-800 p-3 rounded-xl shadow-xl opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-30 text-xs">
+<p class="font-bold mb-1">Shared Citation</p>
+<p class="text-slate-500">Both papers cite "Bahdanau et al. (2014) Neural Machine Translation"</p>
+</div>
+</div>
+<!-- Shared Concept Pill 2 -->
+<div class="absolute top-[55%] z-20 pointer-events-auto cursor-help group/pill">
+<div class="w-8 h-12 rounded-full bg-indigo-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/40 transform transition hover:scale-110">
+<span class="material-symbols-outlined text-sm">link</span>
+</div>
+<div class="absolute right-10 top-0 w-48 bg-white dark:bg-slate-800 p-3 rounded-xl shadow-xl opacity-0 group-hover/pill:opacity-100 transition-opacity pointer-events-none z-30 text-xs text-right">
+<p class="font-bold mb-1">Methodology Overlap</p>
+<p class="text-slate-500">Both utilize Softmax for output probability distribution.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Paper B Column -->
+<section class="flex-1 flex flex-col h-full rounded-2xl bg-background-light dark:bg-background-dark shadow-neu-pressed dark:shadow-neu-dark-pressed p-1 overflow-hidden group">
+<div class="flex flex-col h-full overflow-y-auto custom-scrollbar px-4 py-6">
+<!-- Paper Header B -->
+<div class="flex flex-col gap-4 mb-6">
+<div class="flex items-start justify-between">
+<div>
+<div class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200 mb-2">Paper B</div>
+<h2 class="text-2xl font-bold leading-tight text-slate-900 dark:text-white">BERT: Pre-training of Deep Bidirectional Transformers</h2>
+<p class="text-sm text-slate-500 mt-1">Devlin et al. • Google AI Language • 2018</p>
+</div>
+<button class="size-10 flex-shrink-0 flex items-center justify-center rounded-full bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat hover:text-indigo-500 transition-colors" title="Change Paper">
+<span class="material-symbols-outlined">swap_horiz</span>
+</button>
+</div>
+<!-- Macro Stats B -->
+<div class="grid grid-cols-3 gap-3">
+<div class="p-3 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat flex flex-col items-center justify-center text-center">
+<span class="text-xs text-slate-500 uppercase font-bold tracking-wider">GLUE</span>
+<span class="text-lg font-bold text-indigo-500">80.5</span>
+</div>
+<div class="p-3 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat flex flex-col items-center justify-center text-center">
+<span class="text-xs text-slate-500 uppercase font-bold tracking-wider">Params</span>
+<span class="text-lg font-bold text-slate-800 dark:text-slate-200">340M</span>
+</div>
+<div class="p-3 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-dark-flat flex flex-col items-center justify-center text-center">
+<span class="text-xs text-slate-500 uppercase font-bold tracking-wider">Training</span>
+<span class="text-lg font-bold text-slate-800 dark:text-slate-200">4 Days</span>
+</div>
+</div>
+</div>
+<!-- Abstract / Intro B -->
+<div class="mb-8">
+<h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-indigo-500 text-xl">description</span>
+                        Abstract
+                    </h3>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
+                        We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train <span class="bg-indigo-100 dark:bg-indigo-900/50 px-1 rounded text-indigo-700 dark:text-indigo-300">deep bidirectional representations</span> from unlabeled text by jointly conditioning on both left and right context in all layers.
+                    </p>
+</div>
+<!-- Methodology Image B -->
+<div class="mb-8 p-1 rounded-xl bg-background-light dark:bg-background-dark shadow-neu-pressed dark:shadow-neu-dark-pressed">
+<div class="relative w-full aspect-video rounded-lg overflow-hidden bg-white">
+<img alt="Abstract network visualization with blue tones" class="w-full h-full object-cover opacity-90" data-alt="Abstract network lines connecting nodes in blue color space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCScEiyHWAB2F2-Ixt_5bShdGoJF_N6iMWZCeUwnvcf9oKnGj1eVcBLstF2Dkx_3oM5AOWBlglRy_ozd3jVLGZj8CYLiWan55HAV7ZwGotFYpECCOUlJJauJtpvi95YzduCeNOJ3i7Lr1xe6OnuvibwCXACVV_sYyeJ4-2t9vYHaKDfjznT9dLB8K_5UzJb69OjVxz4ASKybGVDJIMNMpF_NAH75C5wwffatKDhoA9hegBHPkfBXbOhoNFztT7rNS4nnfq4Se_mHr-_"/>
+<div class="absolute bottom-2 right-2 bg-black/50 text-white text-[10px] px-2 py-1 rounded backdrop-blur-sm">Fig 2. BERT Architecture</div>
+</div>
+</div>
+<!-- Methodology Text B -->
+<div class="mb-8">
+<h3 class="text-lg font-bold mb-3 text-indigo-600 dark:text-indigo-400 flex items-center gap-2">
+<span class="material-symbols-outlined text-xl">psychology</span>
+                        Methodology
+                    </h3>
+<div class="pl-4 border-l-2 border-indigo-200 dark:border-indigo-900">
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm mb-4">
+                            BERT’s model architecture is a multi-layer bidirectional Transformer encoder based on the original implementation described in Vaswani et al. (2017).
+                        </p>
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed text-sm">
+<strong class="text-indigo-600 dark:text-indigo-400">Bidirectionality:</strong> Because the use of a bidirectional conditioning would allow each word to indirectly "see itself", the model is pre-trained using a Masked LM (MLM) objective.
+                        </p>
+</div>
+</div>
+<div class="h-20"></div> <!-- Spacer -->
+</div>
+</section>
+</main>
+<!-- Footer Controls (Mobile Only) -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 p-4 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-50">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="text-xs font-bold text-slate-700 dark:text-slate-300">Sync Scroll</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary shadow-inner"></div>
+</label>
+</div>
+<button class="px-4 py-2 bg-primary text-slate-900 rounded-lg text-sm font-bold shadow-neu-flat">
+                Close
+            </button>
+</div>
+</div>
+</body></html>

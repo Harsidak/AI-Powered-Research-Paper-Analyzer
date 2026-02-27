@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Notifications Slide-out Panel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecd6",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102220",
+                        "neumorphic-light": "#e0e5ec",
+                        "neumorphic-dark": "#1e2928",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                    boxShadow: {
+                        'neu-flat': '9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5)',
+                        'neu-flat-dark': '5px 5px 10px #0b1816, -5px -5px 10px #254e4a',
+                        'neu-pressed': 'inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8)',
+                        'neu-pressed-dark': 'inset 4px 4px 8px #0b1816, inset -4px -4px 8px #254e4a',
+                        'neu-btn': '6px 6px 12px #b8b9be, -6px -6px 12px #ffffff',
+                        'neu-btn-dark': '4px 4px 8px #0b1816, -4px -4px 8px #254e4a',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for the notification list */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #334155;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-hidden">
+<!-- Dashboard Background Overlay Simulation -->
+<div class="fixed inset-0 bg-slate-900/10 dark:bg-black/40 backdrop-blur-sm z-40 transition-opacity"></div>
+<!-- Main Dashboard Context (Blurred Background) -->
+<div aria-hidden="true" class="relative flex h-screen w-full flex-col overflow-hidden opacity-50 pointer-events-none">
+<!-- Mock Header -->
+<header class="flex items-center justify-between px-8 py-5 bg-background-light dark:bg-background-dark shadow-sm">
+<div class="flex items-center gap-4">
+<div class="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">R</div>
+<h1 class="text-xl font-bold tracking-tight">Research Dashboard</h1>
+</div>
+<div class="flex gap-4">
+<div class="h-10 w-10 rounded-full bg-white dark:bg-slate-800 shadow-neu-flat dark:shadow-neu-flat-dark"></div>
+<div class="h-10 w-10 rounded-full bg-white dark:bg-slate-800 shadow-neu-flat dark:shadow-neu-flat-dark"></div>
+</div>
+</header>
+<!-- Mock Content Grid -->
+<main class="flex-1 p-8 grid grid-cols-12 gap-6">
+<div class="col-span-8 rounded-xl bg-white dark:bg-slate-800 p-6 shadow-neu-flat dark:shadow-neu-flat-dark h-full">
+<div class="h-full w-full bg-slate-100 dark:bg-slate-700/30 rounded-lg animate-pulse"></div>
+</div>
+<div class="col-span-4 flex flex-col gap-6">
+<div class="h-64 rounded-xl bg-white dark:bg-slate-800 p-6 shadow-neu-flat dark:shadow-neu-flat-dark"></div>
+<div class="flex-1 rounded-xl bg-white dark:bg-slate-800 p-6 shadow-neu-flat dark:shadow-neu-flat-dark"></div>
+</div>
+</main>
+</div>
+<!-- Slide-out Panel -->
+<div class="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col bg-background-light dark:bg-background-dark shadow-2xl transform transition-transform duration-300 ease-out border-l border-slate-200 dark:border-slate-800">
+<!-- Panel Header -->
+<div class="flex items-center justify-between px-6 py-6 border-b border-slate-200/50 dark:border-slate-700/50">
+<div>
+<h2 class="text-2xl font-bold text-slate-800 dark:text-slate-100">Notifications</h2>
+<p class="text-sm text-slate-500 dark:text-slate-400 mt-1">You have 3 unread messages</p>
+</div>
+<button aria-label="Mark all as read" class="group flex h-10 w-10 items-center justify-center rounded-full bg-background-light dark:bg-background-dark shadow-neu-btn dark:shadow-neu-btn-dark active:shadow-neu-pressed dark:active:shadow-neu-pressed-dark transition-all duration-200" title="Mark all as read">
+<span class="material-symbols-outlined text-primary group-hover:text-primary/80 transition-colors" style="font-size: 20px;">done_all</span>
+</button>
+</div>
+<!-- Notification List -->
+<div class="flex-1 overflow-y-auto px-6 py-6 custom-scrollbar">
+<div class="flex flex-col gap-5">
+<!-- Notification 1: File Processed -->
+<div class="group relative flex flex-col gap-3 rounded-xl bg-background-light dark:bg-background-dark p-4 shadow-neu-btn dark:shadow-neu-btn-dark hover:shadow-neu-pressed dark:hover:shadow-neu-pressed-dark transition-all duration-300">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-start gap-4">
+<!-- Icon Container -->
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-flat-dark text-[#4FD1C5]">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<!-- Content -->
+<div class="flex flex-col pt-0.5">
+<h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">Paper X Processed</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                                    Successfully mapped to the Knowledge Graph. Data extraction complete.
+                                </p>
+<span class="text-xs text-slate-400 mt-2 font-medium">2 mins ago</span>
+</div>
+</div>
+</div>
+<!-- Action -->
+<div class="mt-2 flex justify-end">
+<button class="flex items-center justify-center rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-background-light dark:bg-background-dark shadow-neu-btn dark:shadow-neu-btn-dark active:shadow-neu-pressed dark:active:shadow-neu-pressed-dark transition-all hover:text-primary">
+                            View
+                        </button>
+</div>
+</div>
+<!-- Notification 2: Team Activity -->
+<div class="group relative flex flex-col gap-3 rounded-xl bg-background-light dark:bg-background-dark p-4 shadow-neu-btn dark:shadow-neu-btn-dark hover:shadow-neu-pressed dark:hover:shadow-neu-pressed-dark transition-all duration-300">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-start gap-4">
+<!-- Icon Container / Avatar -->
+<div class="h-12 w-12 shrink-0 rounded-full shadow-neu-flat dark:shadow-neu-flat-dark overflow-hidden border-2 border-background-light dark:border-background-dark">
+<img alt="Dr. Smith Portrait" class="h-full w-full object-cover" data-alt="Portrait of a smiling man with glasses" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzatJ8Av7m0IVD7NXRe_DKT3bimc_si1DDTd8VnhuSbwtjxkyparNRDOqdd3T8W22Aec7Fsmo2RQrJ6djx6gNc_CjApR4y_lNNPuTVy5jn4JNJ9atE3lcuApIDu7e6tYU1ygRisHsL-AkWczypxzhxgE410uRtGRBFB0AQyAQ6CbuN0n8bNv_BG2IpnldW97pP53qzvgGJc4z0l45zqAq9pBfIMnKWJEL10YxKAr_Y7-3J6ZXyr6Ut3ubJfjw-Yl9cEtVJueZ7jD9P"/>
+</div>
+<!-- Content -->
+<div class="flex flex-col pt-0.5">
+<h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">Team Invitation</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                                    Dr. Smith invited you to the <span class="font-medium text-slate-700 dark:text-slate-300">"Neural Networks"</span> workspace.
+                                </p>
+<span class="text-xs text-slate-400 mt-2 font-medium">1 hour ago</span>
+</div>
+</div>
+</div>
+<!-- Action -->
+<div class="mt-2 flex justify-end gap-2">
+<button class="flex items-center justify-center rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-background-light dark:bg-background-dark shadow-neu-btn dark:shadow-neu-btn-dark active:shadow-neu-pressed dark:active:shadow-neu-pressed-dark transition-all hover:text-red-500">
+                            Decline
+                        </button>
+<button class="flex items-center justify-center rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary bg-background-light dark:bg-background-dark shadow-neu-btn dark:shadow-neu-btn-dark active:shadow-neu-pressed dark:active:shadow-neu-pressed-dark transition-all">
+                            Accept
+                        </button>
+</div>
+</div>
+<!-- Notification 3: Contradiction Alert -->
+<div class="group relative flex flex-col gap-3 rounded-xl bg-background-light dark:bg-background-dark p-4 shadow-neu-btn dark:shadow-neu-btn-dark hover:shadow-neu-pressed dark:hover:shadow-neu-pressed-dark transition-all duration-300">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-start gap-4">
+<!-- Icon Container -->
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-flat-dark text-[#667EEA]">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<!-- Content -->
+<div class="flex flex-col pt-0.5">
+<h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">Contradiction Alert</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                                    A new contradiction was found between <span class="font-medium text-slate-700 dark:text-slate-300">Paper B</span> and <span class="font-medium text-slate-700 dark:text-slate-300">Paper D</span>.
+                                </p>
+<span class="text-xs text-slate-400 mt-2 font-medium">3 hours ago</span>
+</div>
+</div>
+</div>
+<!-- Action -->
+<div class="mt-2 flex justify-end">
+<button class="flex items-center justify-center rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 bg-background-light dark:bg-background-dark shadow-neu-btn dark:shadow-neu-btn-dark active:shadow-neu-pressed dark:active:shadow-neu-pressed-dark transition-all hover:text-primary">
+                            Review
+                        </button>
+</div>
+</div>
+<!-- Notification 4: System Update (Extra for fullness) -->
+<div class="group relative flex flex-col gap-3 rounded-xl bg-background-light dark:bg-background-dark p-4 shadow-neu-btn dark:shadow-neu-btn-dark hover:shadow-neu-pressed dark:hover:shadow-neu-pressed-dark transition-all duration-300 opacity-60">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-start gap-4">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-background-light dark:bg-background-dark shadow-neu-flat dark:shadow-neu-flat-dark text-slate-400">
+<span class="material-symbols-outlined">system_update</span>
+</div>
+<div class="flex flex-col pt-0.5">
+<h3 class="text-base font-semibold text-slate-800 dark:text-slate-100">System Update</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                                    Knowledge Graph v2.4 deployed successfully.
+                                </p>
+<span class="text-xs text-slate-400 mt-2 font-medium">Yesterday</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Panel Footer -->
+<div class="border-t border-slate-200/50 dark:border-slate-700/50 p-6 bg-background-light dark:bg-background-dark z-10">
+<button class="w-full rounded-xl bg-background-light dark:bg-background-dark py-3.5 text-sm font-bold text-slate-700 dark:text-primary shadow-neu-btn dark:shadow-neu-btn-dark active:shadow-neu-pressed dark:active:shadow-neu-pressed-dark transition-all hover:text-primary dark:hover:text-white flex items-center justify-center gap-2">
+<span>See All Notifications</span>
+<span class="material-symbols-outlined text-lg">arrow_forward</span>
+</button>
+</div>
+</div>
+</body></html>

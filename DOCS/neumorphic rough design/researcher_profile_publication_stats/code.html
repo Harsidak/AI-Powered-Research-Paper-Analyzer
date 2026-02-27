@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Researcher Profile &amp; Publication Stats</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ecd6",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#102220",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                    boxShadow: {
+                        'neumorphic': '9px 9px 16px rgb(209,217,230), -9px -9px 16px rgba(255,255,255, 0.8)',
+                        'neumorphic-sm': '5px 5px 10px rgb(209,217,230), -5px -5px 10px rgba(255,255,255, 0.8)',
+                        'neumorphic-inset': 'inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8)',
+                        'neumorphic-dark': '9px 9px 16px rgb(10,22,20), -9px -9px 16px rgba(28,45,43, 0.8)',
+                        'neumorphic-dark-inset': 'inset 6px 6px 10px 0 rgba(0,0,0, 0.3), inset -6px -6px 10px 0 rgba(30,50,48, 0.5)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Space Grotesk", sans-serif;
+        }
+        /* Custom scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col overflow-x-hidden font-display">
+<!-- Navbar -->
+<header class="flex items-center justify-between whitespace-nowrap px-6 py-4 shadow-neumorphic-sm dark:shadow-neumorphic-dark sticky top-0 z-50 bg-background-light dark:bg-background-dark">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-slate-900 dark:text-white">
+<div class="size-8 text-primary">
+<svg fill="currentColor" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">ResearchHub</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 h-10 w-96">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full shadow-neumorphic-inset dark:shadow-neumorphic-dark-inset overflow-hidden bg-background-light dark:bg-background-dark">
+<div class="text-slate-500 dark:text-slate-400 flex border-none bg-transparent items-center justify-center pl-4">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full flex-1 resize-none bg-transparent text-slate-900 dark:text-white focus:outline-0 focus:ring-0 border-none placeholder:text-slate-400 dark:placeholder:text-slate-500 px-4 text-sm font-normal leading-normal" placeholder="Search publications, people, topics..."/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-900 dark:text-white text-sm font-bold hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Research</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Network</a>
+</nav>
+<div class="h-10 w-10 rounded-full shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark p-1 flex items-center justify-center cursor-pointer hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">notifications</span>
+</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full h-10 w-10 shadow-neumorphic dark:shadow-neumorphic-dark border-2 border-background-light dark:border-background-dark" data-alt="User profile thumbnail" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCPyXZVfzeZok9UVUN9M4v1HwWSieE6KHZd8mhMnl3pxkAT-W4tM93aRT0wwPrSCNr1ZBjIMo3A6oD9mVYxnZ_q-1wlaiNkCLiwU93QMbaJRgNt3eruqxVs0SDT2kqpxaOH0llr-doFrkUHwnQDoMNH9wpWjhJAUOKeINYo5FjlBYFQb0l4jgfmZZ4H2fe4SuOYchqnoobFgXuMsBeYj9FIcQCfnbUVK0nZkiPlOV06XLqLKDF2_tm1lRumvWlZdiJM_kAmUlKq9FEb");'></div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col lg:flex-row max-w-[1440px] mx-auto w-full p-6 lg:p-10 gap-10">
+<!-- Left Column: Profile & Stats -->
+<div class="flex-1 flex flex-col gap-10">
+<!-- User Identity Section -->
+<section class="flex flex-col md:flex-row gap-8 items-start">
+<div class="flex-shrink-0">
+<div class="h-32 w-32 md:h-40 md:w-40 rounded-full shadow-neumorphic dark:shadow-neumorphic-dark p-1 bg-background-light dark:bg-background-dark flex items-center justify-center">
+<div class="h-full w-full rounded-full bg-cover bg-center border-4 border-background-light dark:border-background-dark" data-alt="Researcher profile picture close up" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCd2TYNhANA_or_-9z9rUI4gufBhlfy0FpjhAASUaKYtX6-kCKaNdsAk93UhyoG0Oa3U0X_Vni0nmJQxbvqw8Dbk6VY13i6eRwSG5iEkfpE84AujeDS8J_EFfzkx7weQBf9oYmjz6QJvNNyDD_FfWeVehWi37Siv2lnNd83A_K9JwvcZPHzP9Ih01HMrvPNmj6OgtdwkcPs3jFUwHPuB_gQFPFueboNbIFMqK0qAbeesrz-E_Q0_2NMrcjEx7CIBXxDN0G-BNg4JyUw");'></div>
+</div>
+</div>
+<div class="flex-1 space-y-4 w-full">
+<div>
+<h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-1">Dr. Eleanor Vance</h1>
+<p class="text-primary font-medium text-lg">Senior Research Scientist</p>
+<div class="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm mt-1">
+<span class="material-symbols-outlined text-[18px]">domain</span>
+<span>Institute of Advanced Physics, San Francisco, CA</span>
+</div>
+</div>
+<div class="p-6 rounded-xl shadow-neumorphic-inset dark:shadow-neumorphic-dark-inset bg-background-light dark:bg-background-dark">
+<p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Specializing in quantum fluid dynamics and deep learning applications in particle physics. Passionate about bridging the gap between theoretical models and experimental data. Leading the "Quantum Flux" initiative.
+                        </p>
+</div>
+<!-- Topic Expertise Tags -->
+<div class="flex flex-wrap gap-3">
+<span class="px-4 py-2 rounded-full shadow-neumorphic-sm dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-200 text-sm font-medium hover:text-primary transition-colors cursor-pointer">Deep Learning</span>
+<span class="px-4 py-2 rounded-full shadow-neumorphic-sm dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-200 text-sm font-medium hover:text-primary transition-colors cursor-pointer">Fluid Dynamics</span>
+<span class="px-4 py-2 rounded-full shadow-neumorphic-sm dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-200 text-sm font-medium hover:text-primary transition-colors cursor-pointer">Quantum Mechanics</span>
+<span class="px-4 py-2 rounded-full shadow-neumorphic-sm dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-200 text-sm font-medium hover:text-primary transition-colors cursor-pointer">Particle Physics</span>
+</div>
+</div>
+</section>
+<!-- Stats Grid -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="p-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark flex flex-col items-center justify-center gap-3 group hover:translate-y-[-2px] transition-transform duration-300">
+<div class="h-12 w-12 rounded-full bg-background-light dark:bg-background-dark shadow-neumorphic-sm dark:shadow-neumorphic-dark flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">article</span>
+</div>
+<div class="text-center">
+<p class="text-3xl font-bold text-slate-900 dark:text-white">142</p>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Publications</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="p-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark flex flex-col items-center justify-center gap-3 group hover:translate-y-[-2px] transition-transform duration-300">
+<div class="h-12 w-12 rounded-full bg-background-light dark:bg-background-dark shadow-neumorphic-sm dark:shadow-neumorphic-dark flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">hotel_class</span>
+</div>
+<div class="text-center">
+<p class="text-3xl font-bold text-slate-900 dark:text-white">38</p>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">H-Index</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="p-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark flex flex-col items-center justify-center gap-3 group hover:translate-y-[-2px] transition-transform duration-300">
+<div class="h-12 w-12 rounded-full bg-background-light dark:bg-background-dark shadow-neumorphic-sm dark:shadow-neumorphic-dark flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">format_quote</span>
+</div>
+<div class="text-center">
+<p class="text-3xl font-bold text-slate-900 dark:text-white">4.5k</p>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Total Citations</p>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="p-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark flex flex-col items-center justify-center gap-3 group hover:translate-y-[-2px] transition-transform duration-300">
+<div class="h-12 w-12 rounded-full bg-background-light dark:bg-background-dark shadow-neumorphic-sm dark:shadow-neumorphic-dark flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">science</span>
+</div>
+<div class="text-center">
+<p class="text-3xl font-bold text-slate-900 dark:text-white">12</p>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Projects</p>
+</div>
+</div>
+</section>
+<!-- Activity Heatmap -->
+<section class="p-8 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white">Research Activity</h3>
+<div class="flex gap-2">
+<div class="h-8 w-8 rounded bg-background-light dark:bg-background-dark shadow-neumorphic-sm dark:shadow-neumorphic-dark flex items-center justify-center cursor-pointer hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</div>
+<div class="h-8 w-8 rounded bg-background-light dark:bg-background-dark shadow-neumorphic-sm dark:shadow-neumorphic-dark flex items-center justify-center cursor-pointer hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="w-full overflow-x-auto pb-2">
+<div class="flex gap-1 min-w-max">
+<!-- Simulated Heatmap Columns -->
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/60 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/80 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/50 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/90 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/60 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/70 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/80 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/50 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/90 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/80 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/60 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/50 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/70 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/80 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/60 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/60 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/90 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/80 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/50 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/70 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/60 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/80 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/50 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/90 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/5 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/30 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/60 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/20 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/10 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+<div class="h-4 w-4 rounded-sm bg-primary/40 shadow-neumorphic-sm dark:shadow-neumorphic-dark"></div>
+</div>
+</div>
+</div>
+<div class="flex justify-between text-xs text-slate-400 dark:text-slate-500 mt-2 px-1">
+<span>Jan</span>
+<span>Mar</span>
+<span>May</span>
+<span>Jul</span>
+<span>Sep</span>
+<span>Nov</span>
+</div>
+</section>
+<!-- Latest Publications -->
+<section class="flex flex-col gap-6">
+<h3 class="text-xl font-bold text-slate-900 dark:text-white px-2">Latest Publications</h3>
+<div class="flex flex-col gap-4">
+<!-- Pub Item -->
+<div class="p-5 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-transform duration-200 hover:scale-[1.01]">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Journal of Physics A</span>
+<span class="text-xs text-slate-400">• 2 days ago</span>
+</div>
+<h4 class="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">Quantum Entanglement in Non-Equilibrium Systems</h4>
+<p class="text-sm text-slate-500 mt-1 line-clamp-1">Explores the theoretical boundaries of entanglement entropy in open quantum systems driven by external fields.</p>
+</div>
+<button class="flex-shrink-0 px-5 py-2 rounded-lg shadow-neumorphic-sm dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-primary font-medium text-sm hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2 active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset">
+<span>View Analysis</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Pub Item -->
+<div class="p-5 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-transform duration-200 hover:scale-[1.01]">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Nature Physics</span>
+<span class="text-xs text-slate-400">• 3 weeks ago</span>
+</div>
+<h4 class="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">Deep Learning for Particle Trajectory Reconstruction</h4>
+<p class="text-sm text-slate-500 mt-1 line-clamp-1">A novel graph neural network approach to identifying particle tracks in high-luminosity collider environments.</p>
+</div>
+<button class="flex-shrink-0 px-5 py-2 rounded-lg shadow-neumorphic-sm dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-primary font-medium text-sm hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2 active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset">
+<span>View Analysis</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<!-- Pub Item -->
+<div class="p-5 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-transform duration-200 hover:scale-[1.01]">
+<div class="flex-1">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-bold text-primary uppercase tracking-wider">Fluid Dynamics Review</span>
+<span class="text-xs text-slate-400">• 2 months ago</span>
+</div>
+<h4 class="text-lg font-bold text-slate-800 dark:text-slate-100 leading-tight">Turbulence Modeling in Superfluid Helium-4</h4>
+<p class="text-sm text-slate-500 mt-1 line-clamp-1">Comparative analysis of Vinen and Hall-Vinen-Bekarevich-Khalatnikov equations under extreme rotation.</p>
+</div>
+<button class="flex-shrink-0 px-5 py-2 rounded-lg shadow-neumorphic-sm dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-primary font-medium text-sm hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2 active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset">
+<span>View Analysis</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Right Sidebar -->
+<aside class="w-full lg:w-80 flex flex-col gap-8 flex-shrink-0">
+<!-- Personal Graph Stats -->
+<div class="p-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark flex flex-col items-center">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-6">Knowledge Graph</h3>
+<div class="relative w-48 h-48 mb-4">
+<!-- Circular Gauge Background -->
+<div class="absolute inset-0 rounded-full border-[12px] border-slate-200 dark:border-slate-800 shadow-neumorphic-inset dark:shadow-neumorphic-dark-inset"></div>
+<!-- Circular Gauge Progress (Simulated with conic gradient) -->
+<div class="absolute inset-0 rounded-full border-[12px] border-transparent" style="background: conic-gradient(#13ecd6 0% 68%, transparent 68% 100%); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #fff calc(100% - 12px)); mask: radial-gradient(farthest-side, transparent calc(100% - 12px), #fff calc(100% - 12px));">
+</div>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-4xl font-bold text-slate-900 dark:text-white">68%</span>
+<span class="text-xs text-slate-500 font-medium">Mapped</span>
+</div>
+</div>
+<p class="text-center text-sm text-slate-500 px-4">You have connected 68% of the global entities in your primary field.</p>
+<button class="mt-6 w-full py-3 rounded-xl bg-primary text-slate-900 font-bold shadow-neumorphic-sm dark:shadow-neumorphic-dark hover:brightness-105 active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset transition-all">
+                    Explore Graph
+                </button>
+</div>
+<!-- Quick Actions -->
+<div class="flex flex-col gap-4">
+<button class="w-full py-4 px-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-200 font-bold flex items-center justify-between hover:text-primary transition-colors active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset">
+<span>Edit Profile</span>
+<span class="material-symbols-outlined">edit</span>
+</button>
+<button class="w-full py-4 px-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-200 font-bold flex items-center justify-between hover:text-primary transition-colors active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset">
+<span>Account Settings</span>
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="w-full py-4 px-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark text-slate-700 dark:text-slate-200 font-bold flex items-center justify-between hover:text-primary transition-colors active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset">
+<span>Manage Publications</span>
+<span class="material-symbols-outlined">library_books</span>
+</button>
+</div>
+<!-- Suggested Collaborators -->
+<div class="p-6 rounded-xl shadow-neumorphic dark:shadow-neumorphic-dark bg-background-light dark:bg-background-dark">
+<h3 class="text-md font-bold text-slate-900 dark:text-white mb-4">Suggested Collaborators</h3>
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-cover bg-center shadow-neumorphic-sm dark:shadow-neumorphic-dark" data-alt="Collaborator avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB64hdkJ0IYWkWDlxhPeIvlBDy-cPwm6X_aQR1oeGZG5mJEUGMbzr6so1Db3dIyfJSLXRNe51kiz2xB1N8fR3_Mdjdpty8Jj5ftLmStRu-7XznXpzP4xGxp6kPA10yipa_Mujv4ZQwfU5ITnmJ_7xb97-cQ0THT2RmkjA2hYRtlLW4Iqc_kc1kePaVYuUFRsOQBj9M4TphwI1eqsUifSE4IYoNlIu59Je1GQzmonBJX4mtvBpvuvo0IPx8TrJEfMs3pISKTngF4pK2I");'></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">Dr. James Chen</p>
+<p class="text-xs text-slate-500 truncate">Machine Learning</p>
+</div>
+<button class="h-8 w-8 rounded-full shadow-neumorphic-sm dark:shadow-neumorphic-dark flex items-center justify-center text-primary hover:text-slate-900 active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-cover bg-center shadow-neumorphic-sm dark:shadow-neumorphic-dark" data-alt="Collaborator avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAVRglvcTix28qBePvnKEywxIoSb5MKzS3JZJxJxNYWogX7cP8qEE4ikG-MSba4VVZVy7bUQBqerqWL7iA6-5YiycbsG96uKCZGzNi5Ltn-MgNbtJRIgSdPmF_MFqQYXtSLjrQnMAr2bm-6WtEgWI-oUwqRdh0Wad6p1QySILOUcXdD0JUYmnIl6vS5u49war_t2MW5zlQoEUXTVyJlrAg3DSTLoWt4F9f7qtLDTPRM83RKmi67_3XVvW8XmcI0z4W4cofNtRGJu8DY");'></div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">Prof. Sarah Miller</p>
+<p class="text-xs text-slate-500 truncate">Quantum Physics</p>
+</div>
+<button class="h-8 w-8 rounded-full shadow-neumorphic-sm dark:shadow-neumorphic-dark flex items-center justify-center text-primary hover:text-slate-900 active:shadow-neumorphic-inset dark:active:shadow-neumorphic-dark-inset">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<footer class="mt-12 py-8 text-center text-slate-400 text-sm">
+<p>© 2023 ResearchHub. All rights reserved.</p>
+</footer>
+</body></html>

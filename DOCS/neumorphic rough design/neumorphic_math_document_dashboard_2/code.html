@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Research Ingestion &amp; Synthesis Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#195de6",
+                        "accent-teal": "#4FD1C5",
+                        "accent-indigo": "#667EEA",
+                        "background-light": "#E0E5EC",
+                        "background-dark": "#111621",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                    boxShadow: {
+                        'neu-out': '6px 6px 12px #a3b1c6, -6px -6px 12px #ffffff',
+                        'neu-in': 'inset 4px 4px 8px #a3b1c6, inset -4px -4px 8px #ffffff',
+                        'neu-out-sm': '3px 3px 6px #a3b1c6, -3px -3px 6px #ffffff',
+                        'neu-pressed': 'inset 2px 2px 5px #a3b1c6, inset -2px -2px 5px #ffffff',
+                        'neu-pressed-primary': 'inset 3px 3px 6px #0f3ba0, inset -3px -3px 6px #237fff',
+                        'neu-glow-teal': '0 0 15px #4FD1C5',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .neu-text {
+            color: #4a5568;
+            text-shadow: 1px 1px 1px #ffffff;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent; 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1; 
+            border-radius: 20px; 
+        }
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(79, 209, 197, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(79, 209, 197, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 209, 197, 0); }
+        }
+        .pulsing-ring {
+            animation: pulse-ring 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen text-slate-900 dark:text-slate-100 overflow-x-hidden flex flex-col">
+<div class="fixed inset-0 bg-background-light/40 backdrop-blur-[1px] z-40 pointer-events-none"></div>
+<header class="flex items-center justify-between whitespace-nowrap px-8 py-4 shadow-neu-out mb-6 z-50 bg-background-light relative">
+<div class="flex items-center gap-8 opacity-60">
+<div class="flex items-center gap-4 text-slate-900">
+<div class="size-8 flex items-center justify-center rounded-full shadow-neu-out text-primary">
+<span class="material-symbols-outlined">science</span>
+</div>
+<h2 class="text-slate-900 text-xl font-bold leading-tight tracking-[-0.015em] neu-text">Ingest &amp; Synthesize</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full shadow-neu-in overflow-hidden">
+<div class="text-slate-400 flex border-none bg-transparent items-center justify-center pl-4 pr-2">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden text-slate-600 focus:outline-0 focus:ring-0 border-none bg-transparent focus:border-none h-full placeholder:text-slate-400 px-2 pl-0 text-sm font-normal leading-normal" placeholder="Search synthesis..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<div class="flex items-center gap-6 hidden md:flex">
+<button class="flex items-center gap-2 px-4 py-2 rounded-full shadow-neu-out text-sm font-medium text-slate-600 active:shadow-neu-pressed opacity-60">
+<span class="material-symbols-outlined text-sm">highlight</span>
+                    Highlight Source
+                </button>
+<div class="relative group z-50">
+<button class="flex items-center gap-2 px-6 py-2 rounded-xl bg-background-light text-primary text-sm font-bold shadow-neu-pressed transition-all ring-1 ring-slate-200/50">
+<span class="truncate">Export Workspace</span>
+<span class="material-symbols-outlined text-sm rotate-180 transition-transform">expand_more</span>
+</button>
+<div class="absolute right-0 top-full mt-3 w-48 rounded-xl bg-background-light shadow-neu-out p-3 block z-50 border border-white/40">
+<div class="flex items-center gap-3 p-3 rounded-lg cursor-pointer text-sm text-slate-600 font-medium hover:bg-slate-200/40 hover:shadow-neu-out-sm transition-all group/item mb-2">
+<span class="material-symbols-outlined text-primary text-lg">description</span>
+<div class="flex flex-col">
+<span>.md (Markdown)</span>
+<span class="text-[10px] text-slate-400 font-normal">Text format</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg cursor-pointer text-sm text-slate-600 font-medium hover:bg-slate-200/40 hover:shadow-neu-out-sm transition-all group/item">
+<span class="material-symbols-outlined text-accent-indigo text-lg">functions</span>
+<div class="flex flex-col">
+<span>.tex (LaTeX)</span>
+<span class="text-[10px] text-slate-400 font-normal">Math format</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 shadow-neu-out border-2 border-background-light opacity-60" data-alt="User profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBiyTOULddeKOGrJGSRqKxLTCu-pnywuPpW_KFWJWqCv0Ck4R8Bbnv3iKv7KMknoSocwzOUD0nnl5pb7KOda_nZfkxb3UxqeLdvO9gMuU-yQbQwu5QSGXWJqDGUD94D2W-GcB-F9sX5UF8YLLXyAva77ZFB6Zvpab4-FM27aiCJSFm0U1YL5qIcylWCNHDPEcO3k7W0XyVEwd-ratCCsW7NsG9LRBzuEzXApxXgdgWm9VwOCxTW0wiqcpAdyyvbg3iC8wToQH70aDgu");'></div>
+</div>
+</header>
+<div class="flex flex-1 w-full px-6 pb-6 gap-6 flex-col lg:flex-row h-[calc(100vh-100px)] opacity-50 pointer-events-none grayscale-[20%] transition-opacity duration-300">
+<aside class="w-full lg:w-1/4 flex flex-col gap-6 h-full min-w-[300px]">
+<div class="rounded-xl shadow-neu-out p-6 flex flex-col items-center justify-center gap-4 bg-background-light relative group">
+<h3 class="text-slate-700 font-bold text-lg self-start">Frictionless Ingestion</h3>
+<div class="w-full aspect-[4/3] rounded-xl shadow-neu-in flex flex-col items-center justify-center gap-3 p-4 bg-slate-100/30 border border-slate-200/50 relative overflow-hidden">
+<div class="absolute inset-0 bg-accent-teal/5 animate-pulse"></div>
+<div class="size-14 rounded-full shadow-neu-out flex items-center justify-center text-accent-teal mb-1 z-10">
+<span class="material-symbols-outlined text-3xl">downloading</span>
+</div>
+<p class="text-slate-600 font-medium z-10">Receiving Files...</p>
+<p class="text-slate-400 text-xs text-center z-10">Syncing with local folder</p>
+</div>
+</div>
+<div class="flex-1 rounded-xl shadow-neu-out p-6 flex flex-col gap-4 bg-background-light overflow-hidden">
+<div class="flex justify-between items-center">
+<h3 class="text-slate-700 font-bold text-lg">Queue (10)</h3>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer hover:text-primary">filter_list</span>
+</div>
+<div class="flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar h-full">
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">Attention_Is_All_You_Need.pdf</span>
+<div class="w-full h-1 bg-slate-200 rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-accent-teal w-[90%]"></div>
+</div>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">BERT_Pretraining.pdf</span>
+<div class="w-full h-1 bg-slate-200 rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-accent-teal w-[100%]"></div>
+</div>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">GPT_3_Few_Shot.pdf</span>
+<div class="w-full h-1 bg-slate-200 rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-accent-teal w-[100%]"></div>
+</div>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">LoRA_Adaptation.pdf</span>
+<div class="w-full h-1 bg-slate-200 rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-accent-teal w-[65%]"></div>
+</div>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">Chain_of_Thought.pdf</span>
+<div class="w-full h-1 bg-slate-200 rounded-full mt-1 overflow-hidden">
+<div class="h-full bg-accent-teal w-[10%]"></div>
+</div>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">Flash_Attention.pdf</span>
+<span class="text-xs text-slate-400">Queued</span>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">Instruct_GPT.pdf</span>
+<span class="text-xs text-slate-400">Queued</span>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">Sparse_Transformers.pdf</span>
+<span class="text-xs text-slate-400">Queued</span>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">DALL-E_2_System.pdf</span>
+<span class="text-xs text-slate-400">Queued</span>
+</div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-out flex items-center gap-3 hover:shadow-neu-in cursor-pointer transition-all group">
+<div class="size-8 rounded-full border-2 border-accent-teal flex items-center justify-center text-accent-teal pulsing-ring bg-background-light shrink-0">
+<span class="material-symbols-outlined text-sm">picture_as_pdf</span>
+</div>
+<div class="flex flex-col overflow-hidden w-full">
+<span class="text-sm font-semibold text-slate-700 truncate">Vision_Transformers.pdf</span>
+<span class="text-xs text-slate-400">Queued</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<main class="w-full lg:w-2/4 flex flex-col gap-6 h-full overflow-y-auto pr-2 pb-2 custom-scrollbar">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[250px]">
+<div class="rounded-xl shadow-neu-out p-6 bg-background-light flex flex-col gap-3 relative overflow-hidden">
+<h3 class="text-slate-700 font-bold text-lg">Research Gap Radar</h3>
+<div class="flex-1 flex flex-col justify-center items-center relative">
+<div class="relative z-10 p-4 rounded-xl shadow-neu-out bg-background-light transform transition-transform hover:-translate-y-1">
+<p class="text-sm font-medium text-slate-600 text-center leading-relaxed">
+<span class="block text-xs text-slate-400 uppercase tracking-wide mb-1">Common Limitation</span>
+                                "Current models fail to generalize on <span class="text-primary font-bold">low-resource languages</span> without extensive fine-tuning, creating a scalability bottleneck."
+                            </p>
+</div>
+<div class="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none">
+<div class="size-48 rounded-full border border-slate-300"></div>
+<div class="size-32 rounded-full border border-slate-300 absolute"></div>
+<div class="size-16 rounded-full border border-slate-300 absolute bg-slate-200/50"></div>
+<div class="absolute w-full h-px bg-slate-300 rotate-0"></div>
+<div class="absolute w-full h-px bg-slate-300 rotate-90"></div>
+<div class="absolute w-full h-px bg-slate-300 rotate-45"></div>
+<div class="absolute w-full h-px bg-slate-300 -rotate-45"></div>
+</div>
+</div>
+</div>
+<div class="rounded-xl shadow-neu-out p-6 bg-background-light flex flex-col relative overflow-hidden">
+<div class="absolute top-0 right-0 w-2 h-full bg-accent-indigo opacity-50 shadow-[0_0_15px_rgba(102,126,234,0.5)]"></div>
+<h3 class="text-slate-700 font-bold text-lg mb-4 flex items-center gap-2">
+                        Contradiction Engine
+                        <span class="text-[10px] text-accent-indigo border border-accent-indigo px-1.5 rounded uppercase">High Conflict</span>
+</h3>
+<div class="flex-1 flex flex-col justify-between gap-4">
+<div class="p-3 rounded-lg shadow-neu-in bg-slate-50/50 relative border-l-4 border-slate-300">
+<span class="absolute -top-2 right-2 text-[10px] bg-slate-200 px-1.5 py-0.5 rounded text-slate-500 font-bold shadow-neu-out-sm">Paper A</span>
+<p class="text-xs text-slate-600 italic">"Scaling model size linearly increases reasoning capabilities."</p>
+</div>
+<div class="flex items-center justify-center">
+<div class="size-8 rounded-full shadow-neu-out flex items-center justify-center text-red-500 bg-background-light z-10">
+<span class="material-symbols-outlined text-sm font-bold">close</span>
+</div>
+<div class="h-px bg-slate-300 w-full absolute"></div>
+</div>
+<div class="p-3 rounded-lg shadow-neu-in bg-accent-indigo/5 relative border-l-4 border-accent-indigo">
+<span class="absolute -top-2 right-2 text-[10px] bg-accent-indigo text-white px-1.5 py-0.5 rounded font-bold shadow-md">Paper C</span>
+<p class="text-xs text-slate-700 font-medium italic">"Beyond 100B params, reasoning plateaus unless data quality is improved."</p>
+</div>
+</div>
+</div>
+</div>
+<div class="rounded-xl shadow-neu-out p-6 bg-background-light min-h-[300px] flex flex-col">
+<h3 class="text-slate-700 font-bold text-lg mb-4">Methodology Matrix</h3>
+<div class="w-full overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="text-xs text-slate-400 border-b border-transparent">
+<th class="pb-3 pl-2 font-medium uppercase tracking-wider">Dataset</th>
+<th class="pb-3 font-medium uppercase tracking-wider">Base Model</th>
+<th class="pb-3 font-medium uppercase tracking-wider">Optimization</th>
+<th class="pb-3 pr-2 font-medium uppercase tracking-wider text-right">Hardware</th>
+</tr>
+</thead>
+<tbody class="text-sm text-slate-600">
+<tr class="group hover:bg-slate-50/50 transition-colors">
+<td class="py-3 pl-2">
+<div class="px-3 py-2 rounded-lg shadow-neu-out bg-background-light inline-block min-w-[100px] text-center">CommonCrawl</div>
+</td>
+<td class="py-3">
+<span class="font-semibold text-slate-700">Llama-2 7B</span>
+</td>
+<td class="py-3">
+<span class="px-2 py-1 rounded bg-slate-200 text-xs">QLoRA</span>
+</td>
+<td class="py-3 pr-2 text-right">8x A100</td>
+</tr>
+<tr class="group hover:bg-slate-50/50 transition-colors">
+<td class="py-3 pl-2">
+<div class="px-3 py-2 rounded-lg shadow-neu-out bg-background-light inline-block min-w-[100px] text-center">The Pile</div>
+</td>
+<td class="py-3">
+<span class="font-semibold text-slate-700">Mistral 7B</span>
+</td>
+<td class="py-3">
+<span class="px-2 py-1 rounded bg-slate-200 text-xs">DPO</span>
+</td>
+<td class="py-3 pr-2 text-right">4x H100</td>
+</tr>
+<tr class="group hover:bg-slate-50/50 transition-colors">
+<td class="py-3 pl-2">
+<div class="px-3 py-2 rounded-lg shadow-neu-out bg-background-light inline-block min-w-[100px] text-center">Falcon-Refined</div>
+</td>
+<td class="py-3">
+<span class="font-semibold text-slate-700">Falcon 40B</span>
+</td>
+<td class="py-3">
+<span class="px-2 py-1 rounded bg-slate-200 text-xs">PPO</span>
+</td>
+<td class="py-3 pr-2 text-right">16x A100</td>
+</tr>
+<tr class="group hover:bg-slate-50/50 transition-colors">
+<td class="py-3 pl-2">
+<div class="px-3 py-2 rounded-lg shadow-neu-out bg-background-light inline-block min-w-[100px] text-center">CodeSearchNet</div>
+</td>
+<td class="py-3">
+<span class="font-semibold text-slate-700">StarCoder</span>
+</td>
+<td class="py-3">
+<span class="px-2 py-1 rounded bg-slate-200 text-xs">FIM</span>
+</td>
+<td class="py-3 pr-2 text-right">TPU v4</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="rounded-xl shadow-neu-out p-6 bg-background-light h-64 flex flex-col">
+<h3 class="text-slate-700 font-bold text-lg mb-2">Topic Topography</h3>
+<div class="flex-1 rounded-lg shadow-neu-in relative overflow-hidden bg-slate-100/20">
+<div class="absolute inset-0 opacity-40 blur-2xl">
+<div class="absolute top-1/4 left-1/4 w-32 h-32 bg-primary rounded-full mix-blend-multiply animate-blob"></div>
+<div class="absolute top-1/3 right-1/4 w-32 h-32 bg-accent-teal rounded-full mix-blend-multiply animate-blob animation-delay-2000"></div>
+<div class="absolute bottom-1/4 left-1/3 w-32 h-32 bg-accent-indigo rounded-full mix-blend-multiply animate-blob animation-delay-4000"></div>
+</div>
+<div class="absolute inset-0 z-10">
+<div class="absolute top-[30%] left-[20%] group cursor-pointer">
+<div class="size-3 rounded-full bg-primary shadow-lg ring-4 ring-primary/20"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur px-2 py-1 rounded shadow-sm text-[10px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Transformers</div>
+</div>
+<div class="absolute top-[35%] left-[25%] size-2 rounded-full bg-primary/60 shadow-sm"></div>
+<div class="absolute top-[25%] left-[18%] size-2 rounded-full bg-primary/60 shadow-sm"></div>
+<div class="absolute bottom-[40%] right-[30%] group cursor-pointer">
+<div class="size-4 rounded-full bg-accent-teal shadow-lg ring-4 ring-accent-teal/20"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur px-2 py-1 rounded shadow-sm text-[10px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Reinforcement Learning</div>
+</div>
+<div class="absolute bottom-[35%] right-[25%] size-2 rounded-full bg-accent-teal/60 shadow-sm"></div>
+<div class="absolute bottom-[45%] right-[35%] size-2 rounded-full bg-accent-teal/60 shadow-sm"></div>
+<div class="absolute top-[60%] left-[50%] group cursor-pointer">
+<div class="size-3 rounded-full bg-accent-indigo shadow-lg ring-4 ring-accent-indigo/20"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur px-2 py-1 rounded shadow-sm text-[10px] font-bold text-slate-700 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">Graph Neural Nets</div>
+</div>
+</div>
+<div class="absolute inset-0 z-0 pointer-events-none" style="background-image: linear-gradient(to right, rgba(160,174,192,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(160,174,192,0.1) 1px, transparent 1px); background-size: 40px 40px;"></div>
+</div>
+</div>
+</main>
+<aside class="w-full lg:w-1/4 flex flex-col gap-6 h-full min-w-[300px]">
+<div class="flex-1 rounded-xl shadow-neu-out p-6 flex flex-col bg-background-light">
+<div class="flex justify-between items-center mb-4 border-b border-slate-200 pb-3">
+<div class="flex items-center gap-2">
+<div class="relative">
+<div class="size-8 rounded-full bg-gradient-to-tr from-accent-indigo to-purple-500 shadow-md flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xs">hub</span>
+</div>
+<div class="absolute bottom-0 right-0 size-2.5 bg-green-500 border-2 border-background-light rounded-full"></div>
+</div>
+<div>
+<h3 class="text-slate-700 font-bold text-sm">GraphRAG Assistant</h3>
+<p class="text-[10px] text-slate-500">Context: 14 Papers Active</p>
+</div>
+</div>
+<button class="text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<div class="flex-1 overflow-y-auto mb-4 pr-2 flex flex-col gap-4 custom-scrollbar">
+<div class="self-start max-w-[90%]">
+<div class="bg-background-light shadow-neu-out rounded-2xl rounded-tl-none p-3 text-sm text-slate-600 border border-transparent">
+                            I've synthesized the methodology sections. <span class="font-bold text-accent-indigo">Paper A</span> and <span class="font-bold text-accent-indigo">Paper C</span> have conflicting results on parameter scaling.
+                        </div>
+<span class="text-[10px] text-slate-400 ml-1 mt-1 block">11:02 AM</span>
+</div>
+<div class="self-end max-w-[90%]">
+<div class="bg-primary shadow-lg rounded-2xl rounded-tr-none p-3 text-sm text-white">
+                            Can you explain the discrepancy in their datasets?
+                        </div>
+<span class="text-[10px] text-slate-400 mr-1 mt-1 block text-right">11:03 AM</span>
+</div>
+<div class="self-start max-w-[90%]">
+<div class="bg-background-light shadow-neu-out rounded-2xl rounded-tl-none p-3 text-sm text-slate-600">
+<p class="mb-2">Yes. Paper A uses a cleaner subset (WebText), while Paper C uses uncurated CommonCrawl data.</p>
+<div class="h-24 w-full rounded-lg shadow-neu-in bg-slate-50/30 relative overflow-hidden mb-2 p-2 flex items-center justify-center gap-2">
+<div class="h-16 w-8 bg-blue-300 rounded-sm relative group">
+<div class="absolute bottom-0 w-full bg-blue-500 h-[80%] rounded-sm"></div>
+<span class="text-[8px] absolute -bottom-3 left-0 w-full text-center">A</span>
+</div>
+<div class="h-16 w-8 bg-indigo-300 rounded-sm relative group">
+<div class="absolute bottom-0 w-full bg-indigo-500 h-[40%] rounded-sm"></div>
+<span class="text-[8px] absolute -bottom-3 left-0 w-full text-center">C</span>
+</div>
+<div class="text-[9px] text-slate-400 absolute top-2 right-2">Noise Level</div>
+</div>
+</div>
+<span class="text-[10px] text-slate-400 ml-1 mt-1 block">11:03 AM</span>
+</div>
+</div>
+<div class="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-3 py-1.5 rounded-lg text-xs font-semibold text-accent-indigo shadow-neu-pressed bg-background-light whitespace-nowrap border border-transparent">
+                        Compare Datasets
+                    </button>
+<button class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 shadow-neu-out hover:text-primary active:shadow-neu-pressed bg-background-light whitespace-nowrap transition-all">
+                        Find Consensus
+                    </button>
+<button class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-500 shadow-neu-out hover:text-primary active:shadow-neu-pressed bg-background-light whitespace-nowrap transition-all">
+                        Generate Abstract
+                    </button>
+</div>
+<div class="relative">
+<div class="flex w-full items-center rounded-xl shadow-neu-in bg-background-light overflow-hidden pr-2">
+<input class="w-full bg-transparent border-none text-sm text-slate-700 placeholder:text-slate-400 focus:ring-0 p-3" placeholder="Query the knowledge graph..."/>
+<button class="size-8 rounded-lg bg-primary text-white flex items-center justify-center shadow-lg hover:bg-blue-600 transition-colors">
+<span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+
+</body></html>

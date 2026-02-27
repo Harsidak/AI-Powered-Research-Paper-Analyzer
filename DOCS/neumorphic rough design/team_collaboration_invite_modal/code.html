@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Team Collaboration Invite Modal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#50d3c6",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#131f1e",
+                        "neu-base": "#E0E5EC", 
+                        "neu-shadow-light": "#ffffff",
+                        "neu-shadow-dark": "#a3b1c6",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    boxShadow: {
+                        'neu-flat': '9px 9px 16px rgb(163,177,198,0.6), -9px -9px 16px rgba(255,255,255, 0.5)',
+                        'neu-pressed': 'inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.8)',
+                        'neu-icon': '5px 5px 10px #a3b1c6, -5px -5px 10px #ffffff',
+                        'neu-btn': '6px 6px 10px 0 rgba(163,177,198, 0.7), -6px -6px 10px 0 rgba(255,255,255, 0.8)',
+                        'neu-btn-hover': '4px 4px 6px 0 rgba(163,177,198, 0.5), -4px -4px 6px 0 rgba(255,255,255, 0.6)',
+                        'neu-avatar': '5px 5px 8px #a3b1c6, -5px -5px 8px #ffffff',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Neumorphic specific styles that tailwind config doesn't cover easily */
+        .neu-bg {
+            background-color: #E0E5EC;
+        }
+        .neu-text {
+            color: #4A5568;
+        }
+    </style>
+</head>
+<body class="neu-bg font-display min-h-screen flex items-center justify-center p-4">
+<!-- Blurred Background Context -->
+<div class="fixed inset-0 z-0 overflow-hidden pointer-events-none opacity-40 blur-sm flex flex-col gap-4 p-8">
+<div class="h-32 w-full rounded-2xl bg-gray-300/30"></div>
+<div class="flex gap-4 h-full">
+<div class="w-1/4 h-full rounded-2xl bg-gray-300/30"></div>
+<div class="w-3/4 h-full flex flex-col gap-4">
+<div class="h-64 w-full rounded-2xl bg-gray-300/30"></div>
+<div class="h-64 w-full rounded-2xl bg-gray-300/30"></div>
+</div>
+</div>
+</div>
+<!-- Modal Container -->
+<div class="relative z-10 w-full max-w-[640px] rounded-3xl neu-bg shadow-neu-flat p-8 sm:p-10 flex flex-col gap-8">
+<!-- Header -->
+<div class="flex flex-col gap-1 items-center">
+<h2 class="text-3xl font-bold text-slate-600 tracking-tight">Invite Collaborators</h2>
+<p class="text-slate-400 font-medium text-sm">Add team members to your research project</p>
+</div>
+<!-- Email Input Section -->
+<div class="flex flex-col gap-3">
+<label class="text-slate-500 font-semibold text-sm ml-2">Email Addresses</label>
+<div class="flex items-center w-full rounded-2xl shadow-neu-pressed bg-[#E0E5EC] px-4 py-1">
+<span class="material-symbols-outlined text-slate-400 text-[24px]">mail</span>
+<input class="w-full bg-transparent border-none focus:ring-0 text-slate-600 placeholder:text-slate-400 h-12 text-base ml-2 caret-primary" placeholder="colleague@research.lab, student@univ.edu..." type="text"/>
+</div>
+</div>
+<!-- Role Selection -->
+<div class="flex flex-col gap-3">
+<label class="text-slate-500 font-semibold text-sm ml-2">Select Role</label>
+<div class="flex flex-wrap sm:flex-nowrap gap-4 w-full">
+<!-- Viewer (Radio Option) -->
+<label class="cursor-pointer group flex-1">
+<input class="peer sr-only" name="role" type="radio" value="viewer"/>
+<div class="h-12 flex items-center justify-center rounded-xl bg-[#E0E5EC] shadow-neu-btn text-slate-500 font-medium transition-all duration-200 peer-checked:shadow-neu-pressed peer-checked:text-primary peer-checked:font-bold hover:text-slate-700">
+                        Viewer
+                    </div>
+</label>
+<!-- Editor (Radio Option - Default Checked) -->
+<label class="cursor-pointer group flex-1">
+<input checked="" class="peer sr-only" name="role" type="radio" value="editor"/>
+<div class="h-12 flex items-center justify-center rounded-xl bg-[#E0E5EC] shadow-neu-btn text-slate-500 font-medium transition-all duration-200 peer-checked:shadow-neu-pressed peer-checked:text-primary peer-checked:font-bold hover:text-slate-700">
+                        Editor
+                    </div>
+</label>
+<!-- Admin (Radio Option) -->
+<label class="cursor-pointer group flex-1">
+<input class="peer sr-only" name="role" type="radio" value="admin"/>
+<div class="h-12 flex items-center justify-center rounded-xl bg-[#E0E5EC] shadow-neu-btn text-slate-500 font-medium transition-all duration-200 peer-checked:shadow-neu-pressed peer-checked:text-primary peer-checked:font-bold hover:text-slate-700">
+                        Admin
+                    </div>
+</label>
+</div>
+</div>
+<!-- Permissions Toggle -->
+<div class="flex items-center justify-between px-2 py-1">
+<div class="flex flex-col">
+<span class="text-slate-600 font-semibold text-sm">Allow Data Export</span>
+<span class="text-slate-400 text-xs">Collaborators can download raw datasets</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-14 h-8 bg-[#E0E5EC] peer-focus:outline-none rounded-full shadow-neu-pressed peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-[#E0E5EC] after:border-gray-300 after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-neu-btn peer-checked:after:bg-primary"></div>
+</label>
+</div>
+<!-- Collaborator List -->
+<div class="flex flex-col gap-3">
+<label class="text-slate-500 font-semibold text-sm ml-2">Current Team Members</label>
+<div class="max-h-48 overflow-y-auto pr-2 flex flex-col gap-4 custom-scrollbar">
+<!-- Member 1 -->
+<div class="flex items-center justify-between p-3 rounded-2xl shadow-neu-btn bg-[#E0E5EC]">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-cover bg-center shadow-neu-avatar border-2 border-[#E0E5EC]" data-alt="Portrait of Sarah Connor" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDXa6rGyDhHNJHAUNBdmSyonsQiCjiJzan8nElaE5HlIn6GQyOcV_IhxToip8976uEYarw3-WsrFmdRE_5POBfEeU2Jf6DKwadqFl0_JRGa3_hT0UPqqSKF-c5FG_5MtvQ-Z8r637DZGFEfndoUJqZpZx9LDHzFuZu40wosH71KjeesN_xQ6K60yHb2m6iykCk5kl99y_GLOup_ydWivquy5FDZEPLmRqHbPPhueNGcBFJFPHBtLkwNBQFsNtoilOlyaxBjemgAKGX5');"></div>
+<div class="flex flex-col">
+<span class="text-slate-700 font-bold text-sm">Sarah Connor</span>
+<span class="text-slate-400 text-xs">Admin</span>
+</div>
+</div>
+<button class="h-8 w-8 rounded-full flex items-center justify-center shadow-neu-pressed text-rose-400 hover:text-rose-600 transition-colors">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Member 2 -->
+<div class="flex items-center justify-between p-3 rounded-2xl shadow-neu-btn bg-[#E0E5EC]">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-cover bg-center shadow-neu-avatar border-2 border-[#E0E5EC]" data-alt="Portrait of John Smith" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCiPy5DUW7EsDQ_Ts1eyLTe3-wvvgbPf6X3MchmaZVxlPyHBXxWv8ghuA89Y30ccLdU1s9KBeS_evhOqruqnTT-UM5Ef4fgm04BJJAk7jps_v1CBzm0EXfhZV9_nMljD1rl-xfWIDgbU-ZKM5RxWNF8dpZVj0ZoHdHpT9B1KDr9s0mQ-Hm6v84TdeMPHZ_gq0ZDMR3JRxmm_Pa_ACHdEcyFWxgDPKpzEIc_XJERVioprdt0b7ihOhI-wWmezHd17axTR2AAJz0T1QeR');"></div>
+<div class="flex flex-col">
+<span class="text-slate-700 font-bold text-sm">John Smith</span>
+<span class="text-slate-400 text-xs">Editor</span>
+</div>
+</div>
+<button class="h-8 w-8 rounded-full flex items-center justify-center shadow-neu-pressed text-rose-400 hover:text-rose-600 transition-colors">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<!-- Member 3 -->
+<div class="flex items-center justify-between p-3 rounded-2xl shadow-neu-btn bg-[#E0E5EC]">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-cover bg-center shadow-neu-avatar border-2 border-[#E0E5EC]" data-alt="Portrait of Alex Murphy" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAV6MTSdRBfhZ8-UELTLDmbJ90g9_57jN5FVHTKrDhJAVaapAatxUiCv8L5ATTGaGAIEl1jvE0mshRhwd8N0aOlKKRUZYyFg-uJFHQDlg3Q-9-GnHiDXKOwbN9Y3n-825Gf4OKG9qdC4T65FcTkd38_22sKYyxhjZvgBzRMIjWJfZwLLW8jSU3TT36w0uaRXILqMouqK-3PZbBX-WtNA2W9jTpDr2lpFVu993FgLBa9-yVO6lsCQDyrZSViY3JnobazyjHoFgfKA9Fk');"></div>
+<div class="flex flex-col">
+<span class="text-slate-700 font-bold text-sm">Alex Murphy</span>
+<span class="text-slate-400 text-xs">Viewer</span>
+</div>
+</div>
+<button class="h-8 w-8 rounded-full flex items-center justify-center shadow-neu-pressed text-rose-400 hover:text-rose-600 transition-colors">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center justify-end gap-4 mt-4 pt-2">
+<button class="px-6 py-3 rounded-xl shadow-neu-btn hover:shadow-neu-btn-hover text-slate-500 font-semibold text-sm transition-all active:shadow-neu-pressed">
+                Cancel
+            </button>
+<button class="px-8 py-3 rounded-xl shadow-neu-btn hover:shadow-neu-btn-hover text-primary font-bold text-sm transition-all active:shadow-neu-pressed flex items-center gap-2 group">
+<span class="material-symbols-outlined text-[20px] transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5">send</span>
+                Send Invites
+            </button>
+</div>
+</div>
+</body></html>
