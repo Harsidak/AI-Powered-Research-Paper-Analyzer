@@ -12,8 +12,10 @@ services:
       - ./backend:/app
     environment:
       - REDIS_URL=redis://db-redis:6379/0
+      - DATABASE_URL=postgresql://postgres:postgres@db-postgres:5432/paper_analyzer
     depends_on:
       - db-redis
+      - db-postgres
 
   ai-worker:
     build:
@@ -25,8 +27,22 @@ services:
       - ./backend:/app
     environment:
       - REDIS_URL=redis://db-redis:6379/0
+      - DATABASE_URL=postgresql://postgres:postgres@db-postgres:5432/paper_analyzer
     depends_on:
       - db-redis
+      - db-postgres
+
+  db-postgres:
+    image: postgres:15-alpine
+    container_name: paper-analyzer-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=paper_analyzer
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   db-redis:
     image: redis:7-alpine
@@ -38,3 +54,4 @@ services:
 
 volumes:
   redis_data:
+  postgres_data:
