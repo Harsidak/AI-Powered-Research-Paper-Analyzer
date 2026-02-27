@@ -10,13 +10,16 @@
 - **Interactive Table Extraction**: Pinpoints tables embedded in research papers and extracts them directly into HTML/Markdown formats without corrupting the row and column alignments.
 - **Source Grounding**: Every extracted topic, keyword, or sentence retains a direct link back to its exact bounding-box location in the original PDF, allowing the UI to highlight the exact source location for verification.
 
-## 2. Semantic Search & Discovery
-- **"Meaning-Based" Search**: Moves beyond basic keyword matching (like `Ctrl+F`). By converting documents into dense vector embeddings using models like SciBERT, the system understands the *context* of a query. Searching for "heart attacks" will naturally return papers on "myocardial infarction."
-- **Similar Paper Recommendations**: Automatically detects and clusters similar research papers based on their multi-dimensional thematic similarities rather than overlapping vocabulary.
+## 2. The Core Insights a Researcher Actually Needs
+- **The "Research Gap" Radar**: Automatically extracts and synthesizes the "Limitations and Future Work" paragraphs across all uploaded papers. If multiple papers highlight testing on low-parameter models as a limitation, the tool flags it as a high-probability research gap for the user to exploit.
+- **The Methodology & Dataset Matrix**: Generates a side-by-side comparison grid showing exactly which datasets, base models, evaluation metrics, and optimization algorithms each paper used, allowing researchers to compare apples to apples.
+- **The Contradiction Engine**: GraphRAG explicitly highlights conflicting results. For example, if Paper A claims a fine-tuning method increases accuracy by 10%, but Paper B claims it causes catastrophic forgetting, the system flags the conflict.
+- **The Citation Hierarchy (The "Roots")**: Identifies the foundational bedrock papers that all uploaded documents are citing, ensuring a critical citation is never missed during a literature review.
 
-## 3. Automated Thematic Analysis
-- **Unsupervised Topic Modeling**: Analyzes the entire corpus of uploaded documents dynamically to discover hidden, overarching themes and structural relationships (utilizing BERTopic and HDBSCAN).
-- **Keyword & Statistical Scoring**: Extracts the most statistically important terminology from the documents using TF-IDF and BM25 algorithms to generate automatic, scannable tags for each paper.
+## 3. Topographical Discovery & Thematic Analysis
+- **Trend & Saturation Analysis**: Maps "Saturated Topics" (concepts found in every paper) versus "Emerging Concepts" (highly specific terms only appearing recently), highlighting what is overdone and what is fresh.
+- **Research Topography**: Uses visual scatter plots to group similar research, but explicitly highlights the *empty space*—representing the unexplored intersections between two distinct fields.
+- **Methodology Comparison**: Highlights divergences in experimental setup by focusing on variables, datasets, and hardware constraints, replacing basic text-similarity percentages.
 
 ## 4. High-Performance Asynchronous Architecture (The Worker Queue)
 - **Non-Blocking Uploads via Message Broker**: Users can upload dozens of heavy PDFs simultaneously without hanging the dashboard. The ingestion layer instantly accepts the files, delegates them to a **Redis** job queue, and returns a lightweight `task_id`.
@@ -30,15 +33,16 @@
 - **Global Exception Routing**: The API features a centralized error-handling protocol. If an edge case occurs (e.g., a PDF containing zero extractable words), the system catches the failure before the Pandas engine crashes and returns a clean, structured 422 Unprocessable Entity response.
 - **Malformed Layout Defense**: By relying on layout-aware vision models (MinerU) instead of naive text scrapers, the system acts defensively against highly malformed, multi-column academic layouts that typically break standard data pipelines.
 
-## 6. Premium Neumorphic User Experience
+## 6. Premium Neumorphic User Experience & Exporting
 - **Soft UI Dashboard**: Employs a strictly Neumorphic design language. UI elements like buttons, progress bars, and document cards are styled using subtle CSS inset and outset shadows, creating a premium interface where elements appear physically embossed into the screen.
+- **Export to LaTeX/Markdown (The Final Step)**: Features a prominent Neumorphic button allowing users to export the generated Methodology Matrix, Citation Graph, and synthesized Literature Review directly into a clean Markdown or LaTeX template, bridging the gap between reading and writing.
 - **Micro-Interactions**: Features elegant, continuous animations to report processing states. Soft glowing ring spinners and smooth shadow transitions replace jarring modal popups or abrupt color changes.
 - **Robust Frontend Polling (React Query)**: The frontend silently pings the backend `task_id` every few seconds to check the state of heavy NLP jobs, managing retries and UI caching seamlessly without blank screens or frozen UI threads.
-- **Data Visualization**: Presents the deeply analytical data (extracted LaTeX, table comparisons, topic clusters) in a highly readable, low-cognitive-load layout that utilizes bold typography and spacious data-grouping.
 - **Graceful State Recovery (Error Boundaries)**: React Error Boundaries ensure that if one data visualization chart fails to render, the rest of the dashboard stays alive. Backend API errors are communicated via soft, non-intrusive UI updates rather than jarring modal alerts.
 
 ## 7. Deterministic GraphRAG (Citation Analysis)
 - **The Dual-Engine Architecture**: The system splits processing into two distinct paths: a Statistical Engine (Pandas/NumPy) for mathematical frequencies, and a Relational Engine (Cognee) for complex semantic memory.
 - **Optimized Data Layer**: To prevent database locks, state management is strictly divided: **PostgreSQL** for fast UI lookups, **LanceDB** for rapid semantic vector search, and **NetworkX/Neo4j** specifically for traversing Graph relationships.
+- **Supercharged MathBot AI (GraphRAG Assistant)**: A dedicated chat interface powered by deterministic queried relationships. It includes researcher-tailored default prompt suggestions such as: *"Summarize the future work suggested across these papers"*, *"What datasets are commonly used, and what are their flaws?"*, and *"Find contradictions in their evaluation metrics"*.
 - **Knowledge Graph Generation**: Instead of standard vector matching, the system automatically builds a mathematical graph of "Triplets" (e.g., [Author] -> CITES -> [Paper] -> USES -> [Methodology]).
 - **Hallucination-Free Retrieval**: By querying actual structural relationships mapped in the Knowledge Graph, the integrated AI assistant provides 100% deterministic answers about citation patterns and reference hierarchies, bypassing the unreliability of standard RAG pipelines.
