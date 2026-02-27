@@ -16,15 +16,15 @@ The backend is responsible for mediating all API requests, maintaining logic, an
 - **Primary API Framework**: Strictly FastAPI (Python) using Pandas and NumPy for rapid development. In your report, write: "While the blueprint mentions Rust or Go for maximum throughput, the current architecture strictly utilizes FastAPI, Pandas, and NumPy as required."
 - **Package Management & Tooling**: Instead of relying on traditional tools like `pip`, the backend will aggressively utilize **[uv](https://github.com/astral-sh/uv)** (an extremely fast Python package installer and resolver written in Rust). `uv` ensures that dependency installations are nearly instantaneous and strictly deterministic for reliable builds.
 - **Web Server**: Uvicorn or Gunicorn will be the ASGI server orchestrating the asynchronous handling, allowing the web connections to stay open efficiently.
-- **Data Validation & Typing**: Pydantic models will act as the strict safety contract for incoming data, verifying that JSON payloads match static schemas before any processing occurs.
-- **PDF Validation/Security**: A "safety shield" is required at ingestion. PyMuPDF or QPDF will be used to verify the internal file structure of uploads, quickly identifying and quarantining encrypted files, or PDFs with embedded executables before they even reach the parser.
+- **Data Validation & Typing**: Pydantic V2 models (written in Rust for maximum speed) act as the strict safety contract for incoming data, verifying that JSON payloads match static schemas before any processing occurs.
+- **PDF Validation/Security (The Safety Shield)**: A defensive middleware layer is required at ingestion. **PyMuPDF** or **QPDF** will be used to quickly verify the internal file structure of uploads byte-by-byte, identifying and quarantining encrypted payloads or PDFs with embedded executables before they consume expensive AI compute time.
 
-## 3. Asynchronous Task Processing & Scaling
-Extracting and vectorizing dense research papers is computationally heavy. A synchronous design would crash or hang the server; therefore, the background processing layer scales these tasks.
+## 3. Asynchronous Task Processing & Scaling (The Worker Queue)
+Extracting and vectorizing dense research papers is computationally heavy. Processing a 50-page PDF on the main FastAPI web thread sẽ block the server.
 
-- **Task Queue / Broker**: For the working project, use FastAPI BackgroundTasks or a simple Redis queue. In your report, write: "The current architecture utilizes local async task queues, but is fully containerized to scale dynamically via Kubernetes and Kafka in a high-load cloud deployment."
-- **Containerization & Orchestration**: Kept simple for now utilizing standard **Docker**. Every Python service, API worker, and queue processor will be packaged into isolated Docker containers via `Dockerfiles` and orchestrated locally using `docker-compose`. This guarantees the "works-on-my-machine" problem is eliminated and primes the environment for Kubernetes later. In your report, write: "Containerized to scale dynamically via Kubernetes in a high-load cloud deployment."
-- **Concurrency**: Process execution will rely on thread or process pools (like `concurrent.futures` in Python) to ensure that the main API thread servicing users never stalls during heavy PDF processing.
+- **Message Broker**: When FastAPI receives a PDF, it immediately puts a "job ticket" into a **Redis** queue and instantly returns a `202 Accepted` status with a `task_id` to the frontend, decoupling the heavy lifting from the API.
+- **Python Task Queue**: A separated pool of background Python workers managed by **Celery** or **ARQ** listens to Redis, pulls the job, and executes the heavy NLP pipelines (LangExtract/Cognee), updating the database upon completion.
+- **Containerization & Orchestration**: Hard boundary isolation is achieved using **Docker Compose**. The environment consists of separate isolated services: `api-server` (FastAPI), `ai-worker` (Celery), and databases (`db-postgres`, `db-redis`). This ensures that if an AI worker crashes due to an out-of-memory error from a bad PDF, the main API remains online. Kubernetes (K8s) will be used for cloud deployment to automatically spin up more `ai-worker` pods during traffic spikes.
 
 ## 4. PDF Extraction Engines
 To move beyond basic text extraction (which often mangles two-column formats, drops tables, and corrupts formulas), this system leverages specific scientific parsers.
@@ -46,8 +46,17 @@ The core analytical brain is divided into two distinct processing paths to handl
 - **Deterministic Answers**: By building a mathematical graph of concepts, methodologies, and citations, Cognee allows the AI Assistant to provide 100% accurate, deterministic answers based on actual mapped relationships rather than just guessing via text similarity.
 - **Local-First Infrastructure**: Cognee runs locally out of the box. By default, it utilizes **NetworkX** (a Python graph library) for the Knowledge Graph, **SQLite**, and **LanceDB** (a lightweight, serverless vector database). This avoids the bloat of massive frameworks like LangChain or the complexity of standing up Neo4j Docker containers during initial prototyping.
 
-## 6. Data Storage
-Safely storing the raw files and the calculated analytical metadata so they can be surfaced rapidly back to the dashboard.
+## 6. Data Storage (Optimized Querying)
+A production app needs to retrieve data instantly, avoiding massive lag and locked tables caused by querying graphs and vectors in a single SQLite instance. This architecture divides state management into optimized databases:
 
-- **Blob Storage**: Save the uploaded PDFs to a secure local `temp_files/` directory on the hard drive first. Do not set up cloud buckets (AWS S3, Azure Blob) for the working project yet.
-- **Relational / Document Database**: A persistent database, such as PostgreSQL (relational) or MongoDB (document-based), will be specifically dedicated to maintaining extracted metadata, topic clusters, generated summaries, and the statistical frequencies, ensuring the API doesn't have to recalculate analytics on every page load.
+- **Blob Storage**: Save the uploaded PDFs to a secure local `temp_files/` directory or an AWS S3/Azure Blob bucket in production before queuing the extraction job.
+- **Relational Database**: A robust **PostgreSQL** database stores user accounts, project names, and basic document metadata (Title, Upload Date, Processing Status) for extremely fast standard UI lookups.
+- **Vector Database**: **LanceDB** is dedicated exclusively to semantic search and rapid dense embedding retrieval.
+- **Graph Database**: While NetworkX works locally for Cognee, high-performance relationship traversals (e.g., querying the [Author]->CITES->[Paper] relationships at scale) will utilize a dedicated graph database like **Neo4j** or **Apache AGE**.
+
+## 7. Frontend Polling & Graceful Degradation
+To keep the UI highly responsive while the backend processes files for minutes at a time:
+
+- **Polling Infrastructure**: Implemented via **React Query** (or SWR). Using the `task_id`, the frontend silently pings the backend every few seconds to check state, managing retries and UI caching seamlessly.
+- **Real-Time Extension**: Future iterations will utilize **FastAPI WebSockets** to proactively push progress events ("30% - Extracting tables") down to the specific user's dashboard.
+- **Error Boundaries**: React Error Boundaries ensure that if one data visualization chart fails to render, the rest of the dashboard stays alive. Backend API errors are caught and surfaced via graceful UI notifications rather than crashing the interface.
