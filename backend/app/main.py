@@ -4,7 +4,7 @@ from typing import Dict, Any
 import logging
 
 from app.services.extraction_worker import process_pdf_extraction
-from core.security.pdf_validator import validate_pdf
+from app.core.security.pdf_validator import validate_pdf
 
 # Configure logging for global exception routing
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
