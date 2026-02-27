@@ -22,6 +22,7 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+__init__.py
 
 # Virtual environments
 .env
