@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: paper-analyzer-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - REDIS_URL=redis://db-redis:6379/0
+    depends_on:
+      - db-redis
+
+  ai-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: paper-analyzer-worker
+    command: celery -A app.core.celery_app worker --loglevel=info
+    volumes:
+      - ./backend:/app
+    environment:
+      - REDIS_URL=redis://db-redis:6379/0
+    depends_on:
+      - db-redis
+
+  db-redis:
+    image: redis:7-alpine
+    container_name: paper-analyzer-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:

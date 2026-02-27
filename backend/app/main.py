@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Any
 import logging
 
-from app.core.security.pdf_validator import validate_pdf
+from app.services.extraction_worker import process_pdf_extraction
+from core.security.pdf_validator import validate_pdf
 
 # Configure logging for global exception routing
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -24,6 +25,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import uuid
+import os
+TEMP_DIR = "/app/data/temp_files/"
+os.makedirs(TEMP_DIR, exist_ok=True)
+
 @app.post("/api/v1/upload", status_code=status.HTTP_202_ACCEPTED)
 async def upload_document(
     background_tasks: BackgroundTasks, 
@@ -42,7 +48,6 @@ async def upload_document(
 
     # Read binary payload into memory safely
     # Note: For extremely large files, chunked reading and immediate streaming to disk is preferred.
-    # We read it entirely here for PyMuPDF validation.
     try:
         file_bytes = await file.read()
     except Exception as e:
@@ -61,12 +66,34 @@ async def upload_document(
             detail={"error": "validation_failed", "message": validation_msg}
         )
         
-    # TODO: Save to Blob Storage
-    # TODO: Update PostgreSQL
-    # TODO: Push to Redis Message Broker
+    # Generate Unique Tracking IDs
+    task_id = str(uuid.uuid4())
+    user_id = "mock-user-1" 
     
-    # Mock task_id generation for Phase 1
-    task_id = "mock-uuid-1234-abcd"
+    # Save to Local Blob Storage temporarily for Celery Worker to pick up
+    temp_file_path = os.path.join(TEMP_DIR, f"{task_id}.pdf")
+    try:
+         with open(temp_file_path, "wb") as f:
+            f.write(file_bytes)
+    except Exception as e:
+         logger.error(f"Failed to write physical file for celery worker: {e}")
+         raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "write_failure", "message": "Failed to persist file to disk"}
+        )
+
+    # PUSH TO MESSAGE BROKER (Async Orchestration)
+    # The '.delay()' command instantly places the payload into Redis and returns immediately
+    try:
+        process_pdf_extraction.delay(task_id, temp_file_path, user_id)
+        logger.info(f"Successfully queued Task ID: {task_id}")
+    except Exception as e:
+        logger.error(f"Failed to connect to Redis Broker: {e}")
+        # Consider a 503 Service Unavailable if the queue is fundamentally down
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail={"error": "broker_unavailable", "message": "The asynchronous processing queue is currently down."}
+        )
 
     return {
         "status": "accepted",
