@@ -38,9 +38,10 @@ SYSTEM_PROMPT = (
 
 def _get_llm():
     from langchain_google_genai import ChatGoogleGenerativeAI
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
     return ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        google_api_key=os.environ.get("GEMINI_API_KEY"),
+        model="gemini-2.5-flash",
+        google_api_key=api_key,
         streaming=True,
     )
 
@@ -149,8 +150,40 @@ class GeminiResearchAgent(Agent):
             }
 
 
+# ── Gemini Action (for direct fetch from MathBotChat.tsx) ────────────────────
+
+from copilotkit import Action as CopilotAction
+
+async def _chat_with_gemini_handler(message: str) -> str:
+    """Directly calls Gemini Flash and returns the response as a string."""
+    try:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        from langchain_core.messages import HumanMessage, SystemMessage as SM
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.0-flash",
+            google_api_key=os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"),
+        )
+        response = await llm.ainvoke([
+            SM(content=SYSTEM_PROMPT),
+            HumanMessage(content=message),
+        ])
+        return response.content
+    except Exception as e:
+        return f"MathBot encountered an error: {e}"
+
+_chat_action = CopilotAction(
+    name="chat_with_gemini",
+    description="Send a message to the Gemini Flash research assistant.",
+    parameters=[
+        {"name": "message", "type": "string", "description": "The user message to send."}
+    ],
+    handler=_chat_with_gemini_handler,
+)
+
+
 # ── SDK endpoint ─────────────────────────────────────────────────────────────
 
 copilotkit_sdk = CopilotKitRemoteEndpoint(
     agents=[GeminiResearchAgent()],
+    actions=[_chat_action],
 )

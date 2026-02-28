@@ -1,43 +1,17 @@
-import React, { Component } from 'react';
-import type { ErrorInfo, ReactNode } from 'react';
-import { CopilotKit } from '@copilotkit/react-core';
-import { CopilotPopup } from '@copilotkit/react-ui';
-import { useCopilotReadable } from '@copilotkit/react-core';
+import React from 'react';
 import { UploadCloud, FileText, Download, GitMerge, Activity, Target } from 'lucide-react';
-import '@copilotkit/react-ui/styles.css';
 import UploadDropzone from './components/UploadDropzone';
 import ExtractedDataView from './components/ExtractedDataView';
+import MathBotChat from './components/MathBotChat';
 
-// Error boundary for CopilotPopup ONLY — does NOT affect dashboard rendering
-class ChatBoundary extends Component<
-  { children: ReactNode },
-  { hasError: boolean }
-> {
-  constructor(props: { children: ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(error: Error, _info: ErrorInfo) {
-    console.warn('[CopilotKit] Chat unavailable:', error.message);
-  }
-  render() {
-    if (this.state.hasError) return null; // Silently hide the chat button
-    return this.props.children;
-  }
-}
-
-// ── Root App (CopilotKit wraps everything so hooks work) ────────────────────
 function App() {
   return (
-    <CopilotKit runtimeUrl="http://localhost:8000/api/v1/copilotkit">
-      {/* Dashboard layout — always renders */}
+    <>
+      {/* Dashboard */}
       <div className="flex min-h-screen bg-background text-textMain font-sans">
 
         {/* Sidebar - Neumorphic Inset Panel */}
-        <aside className="w-72 m-6 p-6 rounded-3xl shrink-0 border border-white/50"
+        <aside className="w-72 m-6 p-6 rounded-3xl shrink-0 border border-white/50 relative"
           style={{ boxShadow: 'inset 6px 6px 10px 0 rgba(163,177,198, 0.7), inset -6px -6px 10px 0 rgba(255,255,255, 0.5)' }}>
 
           <div className="flex items-center space-x-3 mb-12">
@@ -72,7 +46,7 @@ function App() {
             </div>
           </header>
 
-          {/* Dashboard Grid System */}
+          {/* Dashboard Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-1">
             <section className="lg:col-span-2 flex flex-col">
               <UploadDropzone />
@@ -91,17 +65,9 @@ function App() {
         </main>
       </div>
 
-      {/* MathBot chat popup — error-bounded so it can't crash the dashboard */}
-      <ChatBoundary>
-        <CopilotPopup
-          instructions="You are MathBot, a deterministic strict GraphRAG AI assistant for a research paper analyzer. Answer precisely based on the user's methodology and contradiction data."
-          labels={{
-            title: "MathBot Assistant",
-            initial: "Hi! Let's analyze the research citations and methodologies together.",
-          }}
-        />
-      </ChatBoundary>
-    </CopilotKit>
+      {/* MathBot floating chat — standalone, no CopilotKit dependency */}
+      <MathBotChat backendUrl="http://localhost:8000" />
+    </>
   );
 }
 
