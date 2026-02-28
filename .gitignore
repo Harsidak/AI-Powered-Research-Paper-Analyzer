@@ -54,5 +54,6 @@ backend/data/lancedb/
 pyproject.toml
 uv.lock
 
-# run.py
+# others
 run.py
+manual.md
