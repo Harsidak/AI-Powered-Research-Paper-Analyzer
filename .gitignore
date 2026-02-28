@@ -48,3 +48,8 @@ Thumbs.db
 # Project specific
 backend/data/temp_files/
 backend/data/lancedb/
+
+# uv files
+.python-version
+pyproject.toml
+uv.lock
