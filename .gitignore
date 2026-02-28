@@ -53,3 +53,6 @@ backend/data/lancedb/
 .python-version
 pyproject.toml
 uv.lock
+
+# run.py
+run.py
