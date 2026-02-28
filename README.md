@@ -1,55 +1,37 @@
 # AI-Powered Research Paper Analyzer
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![React](https://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 
-An enterprise-grade, deterministic, multi-modal LLM pipeline strictly designed for deep academic literature review and research gap identification. By abandoning broad text scrapers and generic vector databases, this architecture ensures mathematically sound "source grounding" and prevents hallucination through a specialized Dual-Engine GraphRAG approach.
+## Problem
+Academic researchers often face an overwhelmingly complex literature landscape. Identifying research gaps and parsing complex PDF layouts (which contain two-column text, intricate tables, and raw mathematical equations) is highly manual and time-consuming. Traditional RAG systems fail when parsing structured academic papers because they treat documents as mere blobs of text, resulting in hallucinatory outputs and poor analytical reasoning when trying to connect distinct methodologies.
 
----
+## Solution
+This project provides a sophisticated, deterministic LLM pipeline designed specifically for academic literature. It processes documents through a highly specific extraction and analysis architecture:
+1. **Multi-Modal Vision Parsing**: Accurately maps physical document geometry using LayoutLMv3/YOLOv8 to appropriately ingest two-column texts, tables, and mathematically transform equations to LaTeX natively.
+2. **Dual-Engine Analytics**: Uniquely splits the extracted schemas. A Statistical Engine runs complex mathematical computations (Trend & Saturation Analysis, Methodology Matrix) using Pandas, while a Relational Engine builds a highly interconnected, traversable Knowledge Graph (NetworkX/LanceDB) powered by the Cognee framework.
 
-## 🏗️ High-Level System Overview
+## Impact
+By systematically digesting and vectorizing papers conceptually, researchers save hundreds of hours on literature reviews. The architecture guarantees mathematically sound source grounding, dramatically reducing LLM hallucination. Users can effortlessly spot critical "Contradictions" in the field and rapidly unearth new research avenues through the dynamic "Gap Radar", completely transforming the pace of academic innovation and discovery.
 
-The system processes highly complex academic PDFs through a 5-Stage decoupled pipeline:
+## Features
+- **Deterministic GraphRAG Extraction**: Creates deterministic knowledge graphs where an LLM explicitly maps structural "Triplets" *(e.g., `Author -> CITES -> Paper -> USES -> Metric`)*.
+- **Dual-Engine Analytics**: Computes strict mathematical operations via Pandas (Statistical) and maps semantic memory via Cognee (Relational).
+- **Nuemorphic Copilot UI**: A visually stunning, strictly typed React dashboard built with TailwindCSS that features a seamlessly integrated CopilotKit AI Assistant.
+- **Ingestion Security Shield**: Byte-level middleware validating uploads against DRM or corruption via PyMuPDF.
+- **Continuous Async Orchestration**: Non-blocking extraction workflows scaled efficiently via a Celery worker pool and a Redis message broker.
 
-1. **Ingestion Security (The Safety Shield)**: A byte-level middleware utilizes PyMuPDF/QPDF to aggressively validate uploads against DRM, corruption, or concealed payloads.
-2. **Asynchronous Orchestration**: Uploads are decoupled from the main thread via a distributed **Celery** worker pool and **Redis** message broker, allowing non-blocking UI responsiveness.
-3. **Multi-Modal Vision Parsing**: Uses underlying layout-aware computer vision models (YOLOv8, LayoutLMv3) to physically map document geometry—preserving two-column logic, tables, and mathematically converting equations to LaTeX natively.
-4. **The Dual-Engine Analytics**: Extracted JSON schemas power parallel processing (Statistical vs Relational).
-5. **Nuemorphic Copilot UI**: A strictly typed, React-based nuemorphic dashboard streaming bidirectional context with the integrated CopilotKit AI Assistant.
+## Tech Stack
+- **Frontend**: React (Vite, TypeScript), TailwindCSS (Nuemorphic constraints), CopilotKit, React Query, Lucide-React.
+- **Backend Application**: Python 3.11, FastAPI, Pydantic V2, Uvicorn.
+- **Message Broker & Queues**: Celery, Redis.
+- **Data Layer**: PostgreSQL, LanceDB, NetworkX.
+- **AI/ML Pipeline**: Cognee, LangExtract, PyMuPDF, Pandas, NumPy.
+- **Infrastructure**: Docker Compose, `uv` (Ultra-fast Rust-based Python package resolver).
 
----
-
-## 🧠 The Dual-Engine Architecture
-
-To prevent the classic failure points of simple RAG (Retrieval-Augmented Generation), analytical state is divided:
-
-### Path A: The Statistical Engine (Dashboard Metrics)
-Strict mathematical computations powered by **Pandas** and **NumPy**. This path aggregates TF-IDF arrays and structured Pydantic methodology models extracted via Google's LangExtract into relational tables. It drives the deterministic **Trend & Saturation Analysis** and **Methodology Matrix**. 
-
-*Stored in: PostgreSQL (Rapid UI Lookups).*
-
-### Path B: The Relational Engine (Cognee GraphRAG)
-Complex semantic memory mapping powered by the **Cognee** framework. Rather than blindly chunking text, an LLM dictates explicit structural "Triplets" *(e.g. `Author -> CITES -> Paper -> USES -> Metric`)*.
-This mathematically traversable map ensures the integrated "MathBot" assistant provides 100% accurate answers regarding citation roots and explicitly flags **Contradictions**.
-
-*Stored across: LanceDB (Semantic Vectors) & NetworkX/Neo4j (Knowledge Graph).*
-
----
-
-## 🛠️ The Tech Stack
-
-*   **Frontend**: React (Vite, TypeScript), TailwindCSS (Nuemorphic strict constraints), CopilotKit, React Query, Lucide-React.
-*   **Backend Application**: Python 3.11, FastAPI, Pydantic V2 (Rust-backed validation), Uvicorn.
-*   **Message Broker & Queues**: Celery, Redis.
-*   **Data Layer**: PostgreSQL, LanceDB, NetworkX.
-*   **AI/ML Pipeline**: Cognee, LangExtract, PyMuPDF, Pandas, NumPy.
-*   **Infrastructure**: Docker Compose, `uv` (Ultra-fast Rust-based Python package resolver).
-
----
-
-## 🚀 Setup Instructions
+## Setup Instructions
 
 ### Prerequisites
 *   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Running)
@@ -78,16 +60,17 @@ npm run dev
 
 The system will connect automatically, accessible at `http://localhost:5173`. 
 
----
-
 ### Local Backend Verification (Without Docker)
 If you require direct Python manipulation, ensure you utilize the `uv` toolchain for deterministic package resolution.
 
 ```bash
 cd backend
-npm install -g uv  # If uv is not installed
+# If uv is not installed: curl -LsSf https://astral.sh/uv/install.sh | sh
 uv venv .venv
 # Activate venv depending on your OS (e.g., .\.venv\Scripts\activate on Windows)
 uv pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
+## License
+This project is licensed under the Apache License 2.0.
