@@ -10,6 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@copilotkit/react-core": "^1.52.1",
+    "@copilotkit/react-textarea": "^1.52.1",
+    "@copilotkit/react-ui": "^1.52.1",
     "lucide-react": "^0.575.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
@@ -19,7 +22,7 @@
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^5.1.1",
+    "@vitejs/plugin-react": "^5.1.4",
     "autoprefixer": "^10.4.27",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",

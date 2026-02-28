@@ -1,6 +1,24 @@
 import { Database, AlertTriangle, Lightbulb } from 'lucide-react';
+import { useCopilotReadable } from '@copilotkit/react-core';
 
 export default function ExtractedDataView() {
+
+    // Mock data representing Path A (Statistical Engine) output
+    const dashboardData = {
+        methodology: {
+            datasets: "WMT 2014, WMT 2014 IT",
+            baseModels: "Transformer (Base)",
+            optimization: "Adam Optimizer"
+        },
+        gapRadar: "The model is currently restricted to text-to-text modalities. (Page 10)"
+    };
+
+    // Broadcast this exact state to the Copilot Assistant
+    useCopilotReadable({
+        description: "The current methodology matrix and limitations extracted from the user's uploaded paper.",
+        value: dashboardData,
+    });
+
     return (
         <div className="w-full flex justify-center animate-in slide-in-from-bottom-8 duration-500">
             <div className="surface-neu p-8 w-full">

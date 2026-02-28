@@ -1,7 +1,10 @@
 import logging
+import asyncio
 from app.core.celery_app import celery_app
 from app.services.pdf_parser import parse_pdf_document
 from app.services.lang_extract_engine import run_lang_extract_pipeline
+from app.services.statistical_engine import statistical_compute
+from app.services.relational_engine import relational_builder
 
 logger = logging.getLogger(__name__)
 
@@ -30,12 +33,24 @@ def process_pdf_extraction(self, task_id: str, file_path: str, user_id: str):
         
         logger.info(f"[{task_id}] LLM Extraction successful. Found Title: {structured_data.metadata.title}")
 
+        # 2b. Statistical Engine (Path A - Pandas)
+        logger.info(f"[{task_id}] Computing Matrix Trends with Statistical Engine...")
+        self.update_state(state="PROGRESS", meta={"status": "CRUNCHING_MATRIX", "progress": 65})
+        raw_json = structured_data.model_dump()
+        df = statistical_compute.format_matrix(raw_json)
+        logger.info(f"[{task_id}] Pandas Matrix Created: {df.shape if not df.empty else 'Empty'}")
+        
         # 3. Relational Path (Cognee GraphRAG)
         logger.info(f"[{task_id}] Running Cognee ECL Pipeline to Neo4j/LanceDB...")
         self.update_state(state="PROGRESS", meta={"status": "BUILDING_GRAPH", "progress": 80})
         
-        # For Phase 3, we simply acknowledge the structured dataset exists
-        # In a later phase, this will push `structured_data.model_dump()` into PostgreSQL and LanceDB
+        # Run the async Cognee builder inside the sync celery thread
+        # Note: In a true prod env with heavy concurrency, we'd want a separate async worker queue
+        asyncio.run(relational_builder.build_knowledge_graph(
+            raw_text=extracted_text, 
+            document_title=structured_data.metadata.title
+        ))
+        logger.info(f"[{task_id}] Knowledge Graph Built Successfully.")
         
         # TODO: Update DB Status to COMPLETE
         logger.info(f"Job {task_id} completed successfully.")

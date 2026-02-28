@@ -5,6 +5,7 @@ import logging
 
 from app.services.extraction_worker import process_pdf_extraction
 from app.core.security.pdf_validator import validate_pdf
+from app.api.v1.copilot_router import copilotkit_router # Added import
 
 # Configure logging for global exception routing
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
