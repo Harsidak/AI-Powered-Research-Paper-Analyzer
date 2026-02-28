@@ -5,7 +5,7 @@ import logging
 
 from app.services.extraction_worker import process_pdf_extraction
 from app.core.security.pdf_validator import validate_pdf
-from app.api.v1.copilot_router import copilotkit_sdk # Modified import
+from app.api.v1.copilot_router import copilotkit_sdk
 from copilotkit.integrations.fastapi import add_fastapi_endpoint
 
 # Configure logging for global exception routing
@@ -28,7 +28,7 @@ app.add_middleware(
 )
 
 # Mount the CopilotKit Router
-add_fastapi_endpoint(app, copilotkit_sdk, "/api/v1/chat")
+add_fastapi_endpoint(app, copilotkit_sdk, "/api/v1/copilotkit")
 
 import uuid
 import os
