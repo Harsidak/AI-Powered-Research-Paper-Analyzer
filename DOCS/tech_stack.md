@@ -16,7 +16,7 @@ The backend is responsible for mediating all API requests, maintaining logic, an
 
 - **Primary API Framework**: Strictly FastAPI (Python) using Pandas and NumPy for rapid development. In your report, write: "While the blueprint mentions Rust or Go for maximum throughput, the current architecture strictly utilizes FastAPI, Pandas, and NumPy as required."
 - **Package Management & Tooling**: Instead of relying on traditional tools like `pip`, the backend will aggressively utilize **[uv](https://github.com/astral-sh/uv)** (an extremely fast Python package installer and resolver written in Rust). `uv` ensures that dependency installations are nearly instantaneous and strictly deterministic for reliable builds.
-- **Web Server**: Uvicorn or Gunicorn will be the ASGI server orchestrating the asynchronous handling, allowing the web connections to stay open efficiently.
+- **Web Server**: Uvicorn will be the ASGI server orchestrating the asynchronous handling, allowing the web connections to stay open efficiently.
 - **Data Validation & Typing**: Pydantic V2 models (written in Rust for maximum speed) act as the strict safety contract for incoming data, verifying that JSON payloads match static schemas before any processing occurs.
 - **PDF Validation/Security (The Safety Shield)**: A defensive middleware layer is required at ingestion. **PyMuPDF** or **QPDF** will be used to quickly verify the internal file structure of uploads byte-by-byte, identifying and quarantining encrypted payloads or PDFs with embedded executables before they consume expensive AI compute time.
 

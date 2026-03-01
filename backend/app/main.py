@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="AI-Powered Research Paper Analyzer",
     description="Deterministic GraphRAG LLM Pipeline API",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="swagger"
 )
 
 # CORS Configuration for the React Frontend
