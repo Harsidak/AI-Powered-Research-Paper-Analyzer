@@ -66,7 +66,7 @@ function App() {
       </div>
 
       {/* MathBot floating chat — standalone, no CopilotKit dependency */}
-      <MathBotChat backendUrl="http://localhost:8000" />
+      <MathBotChat />
     </>
   );
 }

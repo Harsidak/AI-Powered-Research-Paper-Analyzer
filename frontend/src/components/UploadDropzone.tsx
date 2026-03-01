@@ -43,8 +43,8 @@ export default function UploadDropzone() {
         formData.append('file', file);
 
         try {
-            // Pointing to the FastAPI backend Docker instance
-            const response = await fetch('http://localhost:8000/api/v1/upload', {
+            // Hit the Vite proxy, which reliably routes to the underlying FastAPI IP
+            const response = await fetch('/api/v1/upload', {
                 method: 'POST',
                 body: formData,
             });

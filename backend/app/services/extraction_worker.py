@@ -1,7 +1,7 @@
 import logging
 import asyncio
 from app.core.celery_app import celery_app
-from app.services.pdf_parser import parse_pdf_document
+from app.services.mineru_extractor import MinerUExtractor
 from app.services.lang_extract_engine import run_lang_extract_pipeline
 from app.services.statistical_engine import statistical_compute
 from app.services.relational_engine import relational_builder
@@ -19,11 +19,13 @@ def process_pdf_extraction(self, task_id: str, file_path: str, user_id: str):
     try:
         # TODO: Update DB Status to EXTRACTING_LAYOUT
         
-        # 1. Multi-Modal Vision Parsing (PyMuPDF Fallback)
-        logger.info(f"[{task_id}] Initializing Vision Parser...")
+        # 1. Multi-Modal Vision Parsing (MinerU)
+        logger.info(f"[{task_id}] Initializing Vision Parser (MinerU)...")
         self.update_state(state="PROGRESS", meta={"status": "EXTRACTING_LAYOUT", "progress": 10})
         
-        extracted_text = parse_pdf_document(file_path=file_path)
+        extractor = MinerUExtractor()
+        mineru_result = extractor.extract_document(file_path=file_path)
+        extracted_text = mineru_result["markdown"]
         
         # 2. Strict Pydantic Execution Pipeline
         logger.info(f"[{task_id}] Executing LangExtract Schema Validation...")

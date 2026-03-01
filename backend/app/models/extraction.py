@@ -1,6 +1,25 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
+class BoundingBox(BaseModel):
+    x0: float = Field(description="Top left X coordinate.")
+    y0: float = Field(description="Top left Y coordinate.")
+    x1: float = Field(description="Bottom right X coordinate.")
+    y1: float = Field(description="Bottom right Y coordinate.")
+    page_number: int = Field(description="The page number where this element is located.")
+
+class ExtractedTextNode(BaseModel):
+    text: str = Field(description="The extracted raw text content.")
+    bbox: Optional[BoundingBox] = Field(None, description="The physical bounding box on the PDF page.")
+
+class ExtractedEquation(BaseModel):
+    latex: str = Field(description="The formal LaTeX string representing the mathematical equation.")
+    bbox: Optional[BoundingBox] = Field(None, description="The physical bounding box on the PDF page.")
+
+class ExtractedTable(BaseModel):
+    markdown: str = Field(description="The extracted table converted perfectly into Markdown format.")
+    bbox: Optional[BoundingBox] = Field(None, description="The physical bounding box on the PDF page.")
+
 class Author(BaseModel):
     name: str = Field(description="The full name of the author.")
     affiliation: Optional[str] = Field(None, description="The affiliated university or institution.")
