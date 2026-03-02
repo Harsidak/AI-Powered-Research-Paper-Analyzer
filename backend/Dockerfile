@@ -1,38 +1,48 @@
-# Use the official Python lightweight image (3.10 for better compatibility with MinerU/PaddlePaddle)
-FROM python:3.10-slim
+# ── Stage: Base ──────────────────────────────────────────────────────────────
+# Python 3.10 slim for MinerU/PaddlePaddle compatibility
+FROM python:3.10-slim AS base
 
-# Prevent Python from writing .pyc files and enable unbuffered logging
+# Prevent .pyc files and enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies required for PyMuPDF, OpenCV, OCR, and building extensions
-RUN apt-get update && apt-get install -y \
+# PaddlePaddle fixes
+ENV FLAGS_use_mkldnn=0
+ENV PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True
+
+# ── Stage: System Dependencies ───────────────────────────────────────────────
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     gcc \
     curl \
     libgl1-mesa-glx \
     libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory
-WORKDIR /app
-
-# Install uv for blazingly fast package management
+# ── Stage: UV Package Manager ────────────────────────────────────────────────
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Copy the dependency files
-COPY pyproject.toml .
+WORKDIR /app
 
-# Install dependencies using uv (direct into system python for the container)
+# ── Stage: Dependencies (cached layer) ───────────────────────────────────────
+# Copy only dependency files first for better Docker layer caching
+COPY pyproject.toml uv.lock* ./
+
+# Install all Python dependencies into the system Python
 RUN uv pip install --system --no-cache .
 
-# Copy the rest of the backend codebase
+# ── Stage: Application Code ──────────────────────────────────────────────────
 COPY . .
+
+# Create directories for runtime data
+RUN mkdir -p /app/data/temp_files /app/test_output
 
 # Expose the FastAPI port
 EXPOSE 8000
 
-# Command to run the unified ASGI server
+# Default: run the FastAPI server
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-

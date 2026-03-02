@@ -51,6 +51,6 @@ class ExtractedInsights(BaseModel):
     Root extraction matrix to enforce LangExtract Output.
     """
     metadata: PaperMetadata = Field(description="Core paper identification metadata.")
-    methodology: Methodology = Field(description="The comparative methodology matrix.")
+    methodologies: List[Methodology] = Field(default_factory=list, description="The comparative methodology matrix.")
     limitations: List[Limitation] = Field(default_factory=list, description="Extracted limitations driving the Research Gap Radar.")
     contradictions: List[Contradiction] = Field(default_factory=list, description="Extracted contradictions for the Contradiction Engine.")

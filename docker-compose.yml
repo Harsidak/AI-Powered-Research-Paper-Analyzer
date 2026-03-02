@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # ── FastAPI Backend ──────────────────────────────────────────────────────
   api-gateway:
     build:
       context: ./backend
@@ -9,29 +10,37 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./data:/app/data
     environment:
       - REDIS_URL=redis://db-redis:6379/0
       - DATABASE_URL=postgresql://postgres:postgres@db-postgres:5432/paper_analyzer
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
-      - db-redis
-      - db-postgres
+      db-redis:
+        condition: service_healthy
+      db-postgres:
+        condition: service_healthy
 
+  # ── Celery Worker (runs MinerU + LangExtract + Cognee) ──────────────────
   ai-worker:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: paper-analyzer-worker
-    command: celery -A app.core.celery_app worker --loglevel=info
+    command: celery -A app.core.celery_app worker --loglevel=info --concurrency=2
     volumes:
-      - ./backend:/app
+      - ./data:/app/data
     environment:
       - REDIS_URL=redis://db-redis:6379/0
       - DATABASE_URL=postgresql://postgres:postgres@db-postgres:5432/paper_analyzer
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
-      - db-redis
-      - db-postgres
+      db-redis:
+        condition: service_healthy
+      db-postgres:
+        condition: service_healthy
 
+  # ── PostgreSQL ──────────────────────────────────────────────────────────
   db-postgres:
     image: postgres:15-alpine
     container_name: paper-analyzer-postgres
@@ -43,7 +52,13 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
+  # ── Redis (Celery Broker) ───────────────────────────────────────────────
   db-redis:
     image: redis:7-alpine
     container_name: paper-analyzer-redis
@@ -51,6 +66,11 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   redis_data:
