@@ -48,6 +48,10 @@ class RelationalEngine:
             # Ensure LiteLLM (used by Cognee) picks up the key
             os.environ["GOOGLE_API_KEY"] = api_key
             
+            # Configure Chunking to avoid LLM output overflow on large papers
+            cognee.config.set_chunk_size(1000)
+            cognee.config.set_chunk_overlap(100)
+            
             # Set data directories
             cognee.config.system_root_directory = os.path.abspath("./data/cognee_system")
             cognee.config.data_root_directory = os.path.abspath("./data/cognee_data")
@@ -69,8 +73,16 @@ class RelationalEngine:
         try:
             await self._setup_cognee()
             
-            logger.info(f"Adding document '{document_title}' to Cognee cognitive memory...")
-            await add(raw_text, document_title)
+            # Cognee strictly requires dataset names to not have spaces or dots
+            import re
+            dataset_name = re.sub(r'[\s\.]+', '_', document_title).lower()
+            # Truncate to avoid overly long dataset names which might cause DB issues
+            dataset_name = dataset_name[:50].strip('_')
+            if not dataset_name:
+                dataset_name = "default_dataset"
+            
+            logger.info(f"Adding document '{document_title}' to Cognee cognitive memory (dataset: {dataset_name})...")
+            await add(raw_text, dataset_name)
             
             logger.info(f"Cognifying document '{document_title}' into GraphRAG structures...")
             await cognify()

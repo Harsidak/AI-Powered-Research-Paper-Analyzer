@@ -15,6 +15,15 @@ import sys
 import json
 import time
 import logging
+import asyncio
+import sys
+
+# ── Windows Fix ──────────────────────────────────────────────────────────────
+# Force Windows to use the Selector event loop to prevent SSL transport crashes
+# during high-concurrency API calls (like Cognee's triplet extraction).
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 from pathlib import Path
 from datetime import datetime
 
@@ -28,18 +37,25 @@ logger = logging.getLogger("pipeline_test")
 
 # ── Load .env ────────────────────────────────────────────────────────────────
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 # ── Imports (after env is loaded) ────────────────────────────────────────────
 from app.services.mineru_extractor import MinerUExtractor
 from app.services.lang_extract_engine import run_lang_extract_pipeline
 from app.services.statistical_engine import statistical_compute
+from app.services.relational_engine import relational_builder
 
 # ── Paths (anchored to script location) ──────────────────────────────────────
 SCRIPT_DIR   = Path(__file__).resolve().parent
-SAMPLE_PDF   = (SCRIPT_DIR / ".." / "data" / "Shazad.pdf").resolve()
+
+# Support running both locally and inside Docker
+if os.path.exists("/app/data/Attention.pdf"):
+    SAMPLE_PDF = Path("/app/data/Attention.pdf")
+else:
+    SAMPLE_PDF = (SCRIPT_DIR / ".." / "data" / "Attention.pdf").resolve()
+
 OUTPUT_DIR   = SCRIPT_DIR / "test_output"
-RESULTS_DIR  = OUTPUT_DIR / "pipeline_results"
+RESULTS_DIR  = OUTPUT_DIR / SAMPLE_PDF.stem
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -209,10 +225,41 @@ def test_statistical(structured_data) -> dict:
     return {"shape": list(df.shape) if not df.empty else [0, 0]}
 
 
+async def test_cognee(markdown_text: str, title: str) -> dict:
+    """Phase 4: Run Cognee Relational Engine to build knowledge graph."""
+    logger.info("")
+    logger.info("=" * 60)
+    logger.info("PHASE 4 — Relational Engine (Cognee GraphRAG)")
+    logger.info("=" * 60)
+
+    t0 = time.time()
+    
+    # We pass the clean text and title to the relational builder
+    success = await relational_builder.build_knowledge_graph(
+        raw_text=markdown_text,
+        document_title=title or "Unknown Document"
+    )
+    
+    elapsed = round(time.time() - t0, 2)
+    
+    logger.info(f"  Graph Built    : {'Success' if success else 'Failed'}")
+    logger.info(f"  Time           : {elapsed}s")
+    
+    result_data = {
+        "status": "success" if success else "failed",
+        "elapsed_seconds": elapsed,
+        "message": "Graph successfully built and saved to Cognee data directories." if success else "Failed to build graph."
+    }
+    
+    save_json(result_data, "04_cognee_summary.json")
+    
+    return result_data
+
+
 def main():
     logger.info("")
     logger.info("╔════════════════════════════════════════════════════════╗")
-    logger.info("║   MinerU + LangExtract — Robust Integration Test      ║")
+    logger.info("║   MinerU + LangExtract + Cognee Integration Test      ║")
     logger.info("╚════════════════════════════════════════════════════════╝")
     logger.info(f"  PDF         : {SAMPLE_PDF}")
     logger.info(f"  Output Dir  : {RESULTS_DIR}")
@@ -244,6 +291,11 @@ def main():
         stats_result = test_statistical(structured)
         all_results["phase3_statistical"] = "SUCCESS"
         all_results["statistical_shape"] = stats_result["shape"]
+        
+        # ── Phase 4: Relational Engine (Cognee) ──────────────────────
+        title = structured.metadata.title
+        cognee_result = asyncio.run(test_cognee(mineru_result["markdown"], title))
+        all_results["phase4_cognee"] = cognee_result["status"]
 
     except Exception as e:
         logger.error(f"PIPELINE FAILED: {e}", exc_info=True)
