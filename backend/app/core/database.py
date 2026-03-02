@@ -21,6 +21,11 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+def init_db():
+    """Create all tables stored in the Base metadata."""
+    from app.models.task import ExtractionTask # Import models to ensure they are registered
+    Base.metadata.create_all(bind=engine)
+
 def get_db():
     """
     Dependency generator yielding a database session for FastAPI routes.
