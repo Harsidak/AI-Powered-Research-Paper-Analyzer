@@ -24,23 +24,9 @@ def process_pdf_extraction(self, task_id: str, file_path: str, user_id: str):
         if self:
             self.update_state(state="PROGRESS", meta={"status": "EXTRACTING_LAYOUT", "progress": 10})
         
-        try:
-            extractor = MinerUExtractor()
-            mineru_result = extractor.extract_document(file_path=file_path)
-            extracted_text = mineru_result["markdown"]
-        except Exception as e:
-            logger.warning(f"[{task_id}] MinerU failed (likely PyTorch DLL error on Windows). Using mock text for LangExtract pipeline: {e}")
-            extracted_text = """
-            # Attention Is All You Need
-            **Authors:** Ashish Vaswani (Google Brain)
-            **Published:** 2017
-            ## Abstract
-            The dominant sequence transduction models are based on complex recurrent or convolutional neural networks. We propose a new simple network architecture, the Transformer.
-            ## Methodology
-            We trained on the standard WMT 2014 English-to-German dataset. We evaluated the models using the BLEU metric with the Adam optimizer.
-            ## Limitations
-            We plan to extend the Transformer to other modalities.
-            """
+        extractor = MinerUExtractor()
+        mineru_result = extractor.extract_document(file_path=file_path)
+        extracted_text = mineru_result["markdown"]
         
         # 2. Strict Pydantic Execution Pipeline
         logger.info(f"[{task_id}] Executing LangExtract Schema Validation...")
