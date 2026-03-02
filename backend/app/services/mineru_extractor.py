@@ -7,14 +7,8 @@ from pathlib import Path
 os.environ["FLAGS_use_mkldnn"] = "0"
 os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
 
-# The official MinerU 0.6.x API
-from magic_pdf.rw.DiskReaderWriter import DiskReaderWriter
-from magic_pdf.user_api import parse_union_pdf
-from magic_pdf.model.doc_analyze_by_custom_model import doc_analyze
-import magic_pdf.model as model_config
-
-# Force MinerU to run the ML models locally instead of crashing
-model_config.__use_inside_model__ = True
+import logging
+from pathlib import Path
 
 from app.services.markdown_generator import MarkdownGenerator
 

@@ -5,10 +5,10 @@
 ---
 
 ## 1. Advanced Multi-Modal PDF Extraction
-- **Intelligent Layout Parsing**: Goes beyond standard text scrapers by using computer vision models (like YOLOv8 and LayoutLMv3) to "see" the PDF structure visually. It understands two-column formats, headers, and footnotes, preventing text fragmentation.
-- **Accurate Mathematical Translation**: Specializes in detecting complex equations within scientific papers and accurately converting them into clean LaTeX code.
-- **Interactive Table Extraction**: Pinpoints tables embedded in research papers and extracts them directly into HTML/Markdown formats without corrupting the row and column alignments.
-- **Source Grounding**: Every extracted topic, keyword, or sentence retains a direct link back to its exact bounding-box location in the original PDF, allowing the UI to highlight the exact source location for verification.
+- **[✅ Setup Complete - MinerU] Intelligent Layout Parsing**: Goes beyond standard text scrapers by using computer vision models (like YOLOv8 and LayoutLMv3) to "see" the PDF structure visually. It understands two-column formats, headers, and footnotes, preventing text fragmentation.
+- **[✅ Setup Complete - MinerU] Accurate Mathematical Translation**: Specializes in detecting complex equations within scientific papers and accurately converting them into clean LaTeX code.
+- **[✅ Setup Complete - MinerU] Interactive Table Extraction**: Pinpoints tables embedded in research papers and extracts them directly into HTML/Markdown formats without corrupting the row and column alignments.
+- **[⏳ Next Step - LangExtract] Structured Source Grounding**: Enforcing strict Pydantic schemas over the extracted text so every topic or keyword retains a direct link back to its exact bounding-box location in the original PDF.
 
 ## 2. The Core Insights a Researcher Actually Needs
 - **The "Research Gap" Radar**: Automatically extracts and synthesizes the "Limitations and Future Work" paragraphs across all uploaded papers. If multiple papers highlight testing on low-parameter models as a limitation, the tool flags it as a high-probability research gap for the user to exploit.

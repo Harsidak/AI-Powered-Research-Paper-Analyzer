@@ -46,13 +46,13 @@ The application is structured into five distinct, highly decoupled stages. This 
 ### Stage 3: Multi-Modal Data Extraction (The Vision Parsers)
 *The background worker converts the visual PDF into structured, mathematically usable data.*
 
-1. **MinerU / LayoutLMv3 Execution**: The Celery worker passes the PDF into the core open-source extraction engine. Instead of blindly scraping text, the computer vision models map the physical bounding boxes of the layout.
+1. **[✅ COMPLETED] MinerU / LayoutLMv3 Execution**: The Celery worker passes the PDF into the core open-source extraction engine. Instead of blindly scraping text, the computer vision models map the physical bounding boxes of the layout.
    * *Two-column layouts* are read sequentially (`y-axis` sorting prioritized within column bounding boxes).
    * *Headers, Footers, and Citations* are classified and separated from body text into discrete JSON arrays.
-2. **Specialized Element Routing**:
-   * *Equations*: Bounding boxes labeled `equation` are routed to **UniMERNet/PaddleOCR** to be translated perfectly into LaTeX strings (e.g., `\sum_{i=1}^{n} a_i`).
-   * *Tables*: Bounding boxes labeled `table` are routed to **TableMaster** to be converted directly into clean HTML/Markdown grids.
-3. **LangExtract Structuring**: Utilizing Google's LangExtract, the chaotic text is forced into strict, deterministic JSON schemas validated by Pydantic (e.g., `{"authors": ["Smith", "Jones"], "limitations": ["Small dataset", "High latency"]}`). The `ai-worker` updates PostgreSQL to `status: 'ANALYZING'`.
+2. **[✅ COMPLETED] Specialized Element Routing**:
+   * *(Handled via MinerU)* Equations are routed to **UniMERNet/PaddleOCR** to be translated perfectly into LaTeX strings.
+   * Tables are converted directly into clean HTML/Markdown grids.
+3. **[⏳ NOW PENDING] LangExtract Structuring**: Utilizing Google's LangExtract, the chaotic text is forced into strict, deterministic JSON schemas validated by Pydantic (e.g., `{"authors": ["Smith", "Jones"], "limitations": ["Small dataset", "High latency"]}`). The `ai-worker` updates PostgreSQL to `status: 'ANALYZING'`.
 
 ---
 
