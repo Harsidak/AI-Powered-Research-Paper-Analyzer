@@ -49,8 +49,8 @@ class RelationalEngine:
             os.environ["GOOGLE_API_KEY"] = api_key
             
             # Configure Chunking to avoid LLM output overflow on large papers
-            cognee.config.set_chunk_size(1000)
-            cognee.config.set_chunk_overlap(100)
+            cognee.config.set_chunk_size(400)
+            cognee.config.set_chunk_overlap(50)
             
             # Set data directories
             cognee.config.system_root_directory = os.path.abspath("./data/cognee_system")
