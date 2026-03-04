@@ -23,17 +23,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Stage: UV Package Manager ────────────────────────────────────────────────
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
 WORKDIR /app
 
 # ── Stage: Dependencies (cached layer) ───────────────────────────────────────
 # Copy only dependency files first for better Docker layer caching
-COPY pyproject.toml uv.lock* ./
+COPY requirements.txt ./
 
 # Install all Python dependencies into the system Python
-RUN uv pip install --system --no-cache .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # ── Stage: Application Code ──────────────────────────────────────────────────
 COPY . .
