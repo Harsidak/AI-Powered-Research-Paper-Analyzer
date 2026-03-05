@@ -1,12 +1,8 @@
 # ── Stage: Base ──────────────────────────────────────────────────────────────
-# Python 3.10 slim for MinerU/PaddlePaddle compatibility
 FROM python:3.10-slim AS base
 
-# Prevent .pyc files and enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-
-# PaddlePaddle fixes
 ENV FLAGS_use_mkldnn=0
 ENV PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True
 
@@ -23,24 +19,25 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# ── Stage: Package Manager (The 'uv' Upgrade) ────────────────────────────────
+# Pull the lightning-fast uv package manager directly from the official source
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 WORKDIR /app
 
-# ── Stage: Dependencies (cached layer) ───────────────────────────────────────
-# Copy only dependency files first for better Docker layer caching
+# ── Stage: Dependencies (Cached Layer) ───────────────────────────────────────
 COPY requirements.txt ./
 
-# Install all Python dependencies into the system Python
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Use uv to install. We force the CPU index for PyTorch to prevent 4GB CUDA bloat crashes
+# --system tells uv to install into the Docker container's global Python environment
+RUN uv pip install --system --no-cache -r requirements.txt \
+    --extra-index-url https://download.pytorch.org/whl/cpu
 
 # ── Stage: Application Code ──────────────────────────────────────────────────
 COPY . .
 
-# Create directories for runtime data
 RUN mkdir -p /app/data/temp_files /app/test_output
 
-# Expose the FastAPI port
 EXPOSE 8000
 
-# Default: run the FastAPI server
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
