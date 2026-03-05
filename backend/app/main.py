@@ -11,6 +11,10 @@ from copilotkit.integrations.fastapi import add_fastapi_endpoint
 from app.core.database import init_db, get_db
 from app.models.task import ExtractionTask
 from app.api.v1.endpoints.analytics import router as analytics_router
+from app.services.mineru_extractor import MinerUExtractor
+from app.services.lang_extract_engine import run_lang_extract_pipeline
+from app.services.statistical_engine import statistical_compute
+from app.services.relational_engine import relational_builder
 import uuid
 import os
 
@@ -169,6 +173,95 @@ def get_task_status(task_id: str, db: Session = Depends(get_db)):
     }
 
 # Global Exception Handlers
+@app.post("/api/v1/analyze-sync", status_code=status.HTTP_200_OK)
+async def analyze_document_sync(
+    file: UploadFile = File(...)
+) -> Dict[str, Any]:
+    """
+    Synchronous full-pipeline execution for testing via Swagger UI.
+    Upload a PDF, it runs MinerU -> LangExtract -> Pandas -> Cognee and returns the payload.
+    """
+    if file.content_type != "application/pdf":
+        raise HTTPException(
+            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            detail="Only PDF files are supported"
+        )
+
+    try:
+        file_bytes = await file.read()
+    except Exception as e:
+        logger.error(f"Error reading file bytes: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "read_failure", "message": "Failed to read file payload"}
+        )
+
+    # Validate PDF
+    is_valid, validation_msg = validate_pdf(file_bytes)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"error": "validation_failed", "message": validation_msg}
+        )
+
+    temp_file_path = os.path.join(TEMP_DIR, f"sync_test_{uuid.uuid4()}.pdf")
+    try:
+        with open(temp_file_path, "wb") as f:
+            f.write(file_bytes)
+    except Exception as e:
+        logger.error(f"Failed to write file to disk: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "write_failure", "message": "Failed to persist file to disk"}
+        )
+
+    try:
+        # 1. MinerU Vision Parsing
+        logger.info(f"Starting synchronous MinerU extraction for {temp_file_path}")
+        extractor = MinerUExtractor()
+        mineru_result = extractor.extract_document(file_path=temp_file_path)
+        extracted_text = mineru_result["markdown"]
+        
+        # 2. Strict Pydantic Execution Pipeline
+        logger.info(f"Executing LangExtract pipeline...")
+        structured_data = run_lang_extract_pipeline(clean_text=extracted_text)
+        paper_title = structured_data.metadata.title
+        raw_json = structured_data.model_dump()
+
+        # 3. Statistical Engine (Path A - Pandas)
+        logger.info(f"Computing matrix trends...")
+        df = statistical_compute.format_matrix(raw_json)
+        matrix_shape = list(df.shape) if not df.empty else [0, 0]
+        
+        # 4. Relational Path (Cognee GraphRAG)
+        logger.info(f"Running Cognee ECL Pipeline...")
+        success = await relational_builder.build_knowledge_graph(
+            raw_text=extracted_text, 
+            document_title=paper_title or "Unknown Document"
+        )
+        
+        return {
+            "status": "success",
+            "message": "Pipeline executed successfully",
+            "mineru": {
+                "chars_extracted": len(extracted_text)
+            },
+            "pandas": {
+                "matrix_shape": matrix_shape
+            },
+            "cognee": {
+                "success": success
+            },
+            "extracted_data": raw_json
+        }
+    except Exception as e:
+        logger.error(f"Sync pipeline failed: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Fallback handler to prevent unstructured server crashes."""
