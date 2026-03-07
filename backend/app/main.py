@@ -260,6 +260,14 @@ async def analyze_document_sync(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+    finally:
+        # 6. Cleanup Temporary File
+        if os.path.exists(temp_file_path):
+            try:
+                os.remove(temp_file_path)
+                logger.info(f"Cleaned up temporary file: {temp_file_path}")
+            except Exception as cleanup_error:
+                logger.error(f"Failed to cleanup temp file {temp_file_path}: {cleanup_error}")
 
 
 @app.exception_handler(Exception)

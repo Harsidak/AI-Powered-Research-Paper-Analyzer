@@ -1,5 +1,6 @@
 # ── Stage: Base ──────────────────────────────────────────────────────────────
-FROM python:3.10-slim AS base
+# We use the official PyTorch image which already includes C++ compilers and core math libraries
+FROM pytorch/pytorch:2.2.1-cuda12.1-cudnn8-runtime AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -7,16 +8,11 @@ ENV FLAGS_use_mkldnn=0
 ENV PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK=True
 
 # ── Stage: System Dependencies ───────────────────────────────────────────────
+# Only install the absolute minimum required for OpenCV (MinerU vision)
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libpq-dev \
-    gcc \
     curl \
     libgl1 \
     libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Stage: Package Manager (The 'uv' Upgrade) ────────────────────────────────
