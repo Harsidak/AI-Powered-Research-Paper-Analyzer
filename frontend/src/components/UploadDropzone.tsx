@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, File, CheckCircle2, AlertCircle, Loader2, Shield, Brain, BarChart3, GitMerge } from 'lucide-react';
+import { Upload, File, CheckCircle2, AlertCircle, Loader2, Shield, Brain, GitMerge } from 'lucide-react';
 import type { AnalysisResult } from '../App';
 
 interface UploadDropzoneProps {
