@@ -421,6 +421,50 @@ def _escape_latex(text: str) -> str:
 
 
 # ═════════════════════════════════════════════════════════════════════════════
+# ROUTE 3b: BibTeX Citation Export
+# ═════════════════════════════════════════════════════════════════════════════
+class BibTeXRequest(BaseModel):
+    extracted_data: Dict[str, Any]
+
+@app.post("/api/v1/export/bibtex")
+async def export_bibtex(req: BibTeXRequest):
+    """Generate a BibTeX citation entry from the paper's metadata."""
+    metadata = req.extracted_data.get("metadata", {})
+    title = metadata.get("title", "Untitled")
+    authors_list = metadata.get("authors", [])
+    year = metadata.get("publication_year", "")
+    abstract = metadata.get("abstract", "")
+
+    # BibTeX author format: "Last1, First1 and Last2, First2"
+    author_names = []
+    for a in authors_list:
+        name = a.get("name", "Unknown")
+        parts = name.strip().split()
+        if len(parts) >= 2:
+            author_names.append(f"{parts[-1]}, {' '.join(parts[:-1])}")
+        else:
+            author_names.append(name)
+    authors_bibtex = " and ".join(author_names)
+
+    # Generate a citation key from first author's last name + year
+    first_last = authors_list[0].get("name", "unknown").split()[-1].lower() if authors_list else "unknown"
+    cite_key = f"{first_last}{year}" if year else first_last
+
+    bibtex = f"""@article{{{cite_key},
+  title     = {{{title}}},
+  author    = {{{authors_bibtex}}},
+  year      = {{{year or 'N/A'}}},
+  abstract  = {{{abstract[:500]}}}
+}}
+"""
+    return PlainTextResponse(
+        bibtex.strip(),
+        media_type="application/x-bibtex",
+        headers={"Content-Disposition": f"attachment; filename={cite_key}.bib"}
+    )
+
+
+# ═════════════════════════════════════════════════════════════════════════════
 # ROUTE 4: Analysis History
 # ═════════════════════════════════════════════════════════════════════════════
 @app.get("/api/v1/history")

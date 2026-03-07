@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Clock, FileText, Trash2, ChevronRight, Loader2, Users, BarChart3, RefreshCcw } from 'lucide-react';
+import toast from 'react-hot-toast';
 import type { AnalysisResult } from '../App';
 
 interface HistorySummary {
@@ -30,6 +31,7 @@ export default function HistoryView({ onLoadAnalysis }: HistoryViewProps) {
             setEntries(data.history || []);
         } catch (err) {
             console.error('Failed to load history:', err);
+            toast.error('Failed to load history');
         } finally {
             setLoading(false);
         }
@@ -46,6 +48,7 @@ export default function HistoryView({ onLoadAnalysis }: HistoryViewProps) {
             onLoadAnalysis(data as AnalysisResult);
         } catch (err) {
             console.error('Failed to load analysis:', err);
+            toast.error('Failed to load analysis');
         } finally {
             setLoadingId(null);
         }
@@ -59,8 +62,10 @@ export default function HistoryView({ onLoadAnalysis }: HistoryViewProps) {
             const res = await fetch(`/api/v1/history/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('Failed to delete');
             setEntries(prev => prev.filter(entry => entry.id !== id));
+            toast.success('Analysis deleted');
         } catch (err) {
             console.error('Delete failed:', err);
+            toast.error('Delete failed');
         } finally {
             setDeletingId(null);
         }

@@ -2,25 +2,162 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══ Light Theme (Default) ═══════════════════════════════════════════════ */
+:root {
+  --bg: #e0e5ec;
+  --primary: #4763ff;
+  --text-main: #2d3436;
+  --text-light: #636e72;
+  --shadow-flat: 9px 9px 16px rgb(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+  --shadow-pressed: inset 6px 6px 10px 0 rgba(163, 177, 198, 0.7), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.5);
+  --shadow-sm: 4px 4px 8px rgb(163, 177, 198, 0.6), -4px -4px 8px rgba(255, 255, 255, 0.5);
+  --card-border: rgba(255, 255, 255, 0.4);
+  --sidebar-inset: inset 6px 6px 10px 0 rgba(163, 177, 198, 0.7), inset -6px -6px 10px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* ═══ Dark Theme ════════════════════════════════════════════════════════════ */
+.dark {
+  --bg: #1a1d23;
+  --primary: #6c8cff;
+  --text-main: #e4e6ea;
+  --text-light: #9ca3af;
+  --shadow-flat: 6px 6px 12px rgba(0, 0, 0, 0.5), -6px -6px 12px rgba(50, 55, 65, 0.3);
+  --shadow-pressed: inset 4px 4px 8px rgba(0, 0, 0, 0.5), inset -4px -4px 8px rgba(50, 55, 65, 0.3);
+  --shadow-sm: 3px 3px 6px rgba(0, 0, 0, 0.4), -3px -3px 6px rgba(50, 55, 65, 0.25);
+  --card-border: rgba(255, 255, 255, 0.06);
+  --sidebar-inset: inset 4px 4px 8px rgba(0, 0, 0, 0.5), inset -4px -4px 8px rgba(50, 55, 65, 0.3);
+}
+
 @layer base {
   body {
     @apply bg-background text-textMain min-h-screen font-sans antialiased;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
+/* Force dark background on html & body */
+.dark,
+.dark body {
+  background-color: #1a1d23 !important;
+  color: #e4e6ea !important;
+}
+
+.dark .bg-background {
+  background-color: #1a1d23 !important;
+}
+
+.dark .border-white\/40,
+.dark .border-white\/50 {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
 @layer components {
-  /* Core Neumorphic Surface */
   .surface-neu {
-    @apply bg-background shadow-neu-flat rounded-2xl border border-white/40;
+    @apply bg-background shadow-neu-flat rounded-2xl;
+    border: 1px solid var(--card-border);
+    transition: box-shadow 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
   }
 
-  /* Pressed Interactive Surface */
   .surface-neu-pressed {
     @apply bg-background shadow-neu-pressed rounded-2xl border border-transparent;
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
   }
 
-  /* Neumorphic Primary action button */
   .btn-primary {
     @apply px-6 py-3 font-semibold text-primary rounded-xl transition-all duration-300 ease-in-out surface-neu hover:shadow-neu-sm active:surface-neu-pressed active:text-opacity-80;
+  }
+
+  /* Toast container overrides */
+  .toast-custom {
+    @apply bg-background text-textMain shadow-neu-flat rounded-xl;
+    border: 1px solid var(--card-border);
+  }
+}
+
+/* ═══ Dark mode patches for hardcoded colors ════════════════════════════════ */
+.dark .bg-primary\/10 {
+  background-color: rgba(108, 140, 255, 0.15);
+}
+
+.dark .text-blue-700 {
+  color: #93b4ff;
+}
+
+.dark .text-purple-700 {
+  color: #c4b5fd;
+}
+
+.dark .text-green-700 {
+  color: #86efac;
+}
+
+.dark .text-orange-700 {
+  color: #fdba74;
+}
+
+.dark .text-amber-700 {
+  color: #fcd34d;
+}
+
+.dark .text-red-600 {
+  color: #fca5a5;
+}
+
+.dark .text-red-800 {
+  color: #fca5a5;
+}
+
+.dark .text-blue-600 {
+  color: #93b4ff;
+}
+
+.dark .text-blue-800 {
+  color: #93b4ff;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db;
+}
+
+.dark .text-gray-800 {
+  color: #e5e7eb;
+}
+
+.dark .text-gray-300 {
+  color: #6b7280;
+}
+
+/* ═══ Transition for view switches ══════════════════════════════════════════ */
+.view-transition-enter {
+  animation: viewFadeIn 0.35s ease-out;
+}
+
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══ Skeleton loading shimmer ══════════════════════════════════════════════ */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg) 25%, rgba(255, 255, 255, 0.15) 50%, var(--bg) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.75rem;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
   }
 }
