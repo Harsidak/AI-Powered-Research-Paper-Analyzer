@@ -1,5 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { UploadCloud, FileText, Download, Activity, ChevronRight, Clock, BarChart3, Sun, Moon, Menu, X, Keyboard, BookMarked } from 'lucide-react';
+import {
+  UploadCloud, FileText, Download, Activity, ChevronRight, Clock, BarChart3,
+  Sun, Moon, Menu, X, Keyboard, BookMarked, Sparkles, Zap
+} from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import UploadDropzone from './components/UploadDropzone';
 import ExtractedDataView from './components/ExtractedDataView';
@@ -8,7 +11,7 @@ import MathBotChat from './components/MathBotChat';
 import { useTheme } from './hooks/useTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
-// TypeScript interfaces matching backend Pydantic schemas
+// TypeScript interfaces matching backend schemas
 interface Author { name: string; affiliation?: string; }
 interface PaperMetadata { title: string; authors: Author[]; publication_year?: number; abstract: string; }
 interface Methodology { datasets: string[]; base_models: string[]; metrics: string[]; optimization?: string; }
@@ -38,7 +41,7 @@ function App() {
   const handleAnalysisComplete = (data: AnalysisResult) => {
     setAnalysisData(data);
     setCurrentView('analysis');
-    toast.success('Analysis complete!', { duration: 3000 });
+    toast.success('Analysis complete! 🎉', { duration: 3000 });
   };
 
   const handleExport = async (format: 'latex' | 'markdown') => {
@@ -58,9 +61,8 @@ function App() {
       a.download = format === 'latex' ? 'analysis.tex' : 'analysis.md';
       a.click();
       URL.revokeObjectURL(url);
-      toast.success(`Exported as ${format === 'latex' ? 'LaTeX' : 'Markdown'}`, { duration: 2000 });
-    } catch (err) {
-      console.error('Export error:', err);
+      toast.success(`Exported as ${format === 'latex' ? 'LaTeX' : 'Markdown'} ✓`);
+    } catch {
       toast.error('Export failed. Please try again.');
     } finally {
       setExporting(false);
@@ -83,27 +85,26 @@ function App() {
       a.download = 'citation.bib';
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('BibTeX citation downloaded');
-    } catch (err) {
-      console.error('BibTeX error:', err);
+      toast.success('BibTeX citation downloaded ✓');
+    } catch {
       toast.error('BibTeX export failed');
     }
   };
 
-  // Keyboard shortcuts
   const shortcutActions = useMemo(() => ({
     onUpload: () => setCurrentView('upload'),
     onHistory: () => setCurrentView('history'),
     onExportLatex: () => handleExport('latex'),
     onExportMd: () => handleExport('markdown'),
     onToggleTheme: toggleTheme,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [analysisData, toggleTheme]);
   useKeyboardShortcuts(shortcutActions);
 
   const navItems: { icon: React.ReactNode; label: string; view: DashboardView; alwaysEnabled?: boolean; shortcut?: string }[] = [
-    { icon: <UploadCloud />, label: 'Ingestion', view: 'upload', alwaysEnabled: true, shortcut: 'U' },
-    { icon: <BarChart3 />, label: 'Analysis', view: 'analysis', shortcut: 'A' },
-    { icon: <Clock />, label: 'History', view: 'history', alwaysEnabled: true, shortcut: 'H' },
+    { icon: <UploadCloud className="w-[18px] h-[18px]" />, label: 'Ingestion', view: 'upload', alwaysEnabled: true, shortcut: 'U' },
+    { icon: <BarChart3 className="w-[18px] h-[18px]" />, label: 'Analysis', view: 'analysis', shortcut: 'A' },
+    { icon: <Clock className="w-[18px] h-[18px]" />, label: 'History', view: 'history', alwaysEnabled: true, shortcut: 'H' },
   ];
 
   return (
@@ -112,176 +113,168 @@ function App() {
         position="top-right"
         toastOptions={{
           className: 'toast-custom',
-          style: { background: 'var(--bg)', color: 'var(--text-main)', border: '1px solid var(--card-border)' },
-          success: { iconTheme: { primary: '#4763ff', secondary: 'white' } },
+          style: { background: 'var(--bg)', color: 'var(--text-main)', border: '1px solid var(--border)', fontFamily: 'Inter' },
+          success: { iconTheme: { primary: '#22d3ee', secondary: 'white' } },
           error: { iconTheme: { primary: '#ef4444', secondary: 'white' } },
         }}
       />
 
-      <div className="flex min-h-screen bg-background text-textMain font-sans">
+      <div className="flex min-h-screen bg-background font-sans">
 
         {/* ───── Mobile Hamburger ───── */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed top-6 left-6 z-50 p-3 surface-neu rounded-xl"
+          className="lg:hidden fixed top-5 left-5 z-50 p-3 surface-neu rounded-xl"
         >
           {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
 
-        {/* ───── Sidebar Overlay (mobile) ───── */}
+        {/* ───── Mobile Overlay ───── */}
         {sidebarOpen && (
-          <div
-            className="lg:hidden fixed inset-0 bg-black/30 z-30 backdrop-blur-sm"
-            onClick={() => setSidebarOpen(false)}
-          />
+          <div className="lg:hidden fixed inset-0 bg-black/30 z-30 backdrop-blur-sm animate-fade-in" onClick={() => setSidebarOpen(false)} />
         )}
 
-        {/* ───── Sidebar ───── */}
+        {/* ═══════════ SIDEBAR ═══════════ */}
         <aside className={`
-          w-72 m-6 p-6 rounded-3xl shrink-0 relative flex flex-col transition-transform duration-300 z-40
-          fixed lg:static top-0 left-0 h-[calc(100vh-3rem)]
+          w-[280px] m-5 p-6 rounded-3xl shrink-0 relative flex flex-col z-40
+          fixed lg:static top-0 left-0 h-[calc(100vh-2.5rem)]
+          transition-all duration-300 ease-out
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-[120%] lg:translate-x-0'}
-        `}
-          style={{ boxShadow: 'var(--sidebar-inset)', border: '1px solid var(--card-border)' }}>
+        `} style={{ boxShadow: 'var(--sidebar-shadow)', border: '1px solid var(--border)' }}>
 
-          <div className="flex items-center space-x-3 mb-10">
-            <div className="p-3 bg-background rounded-xl shadow-neu-sm" style={{ border: '1px solid var(--card-border)' }}>
-              <Activity className="w-6 h-6 text-primary" />
+          {/* Logo */}
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'var(--gradient-primary)' }}>
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <h1 className="text-xl font-bold tracking-tight">Researcher<br />Co-Pilot</h1>
+            <div>
+              <h1 className="text-base font-extrabold tracking-tight leading-tight">Researcher</h1>
+              <p className="text-[11px] font-medium text-textLight tracking-wider uppercase">Co-Pilot</p>
+            </div>
           </div>
 
-          <nav className="space-y-2 flex-1">
-            {navItems.map(item => (
-              <button
-                key={item.view}
-                onClick={() => {
-                  if (item.alwaysEnabled || analysisData) {
-                    setCurrentView(item.view);
-                    setSidebarOpen(false);
-                  }
-                }}
-                className={`w-full flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-all duration-300 border border-transparent text-left group
-                  ${currentView === item.view
-                    ? 'surface-neu text-primary'
-                    : analysisData || item.alwaysEnabled
-                      ? 'text-textLight hover:text-textMain hover:bg-white/5'
-                      : 'text-gray-400 cursor-not-allowed opacity-40'
-                  }`}
-                disabled={!analysisData && !item.alwaysEnabled}
-              >
-                <div className={`w-5 h-5 flex items-center justify-center ${currentView === item.view ? 'text-primary' : ''}`}>
-                  {item.icon}
-                </div>
-                <span className="font-medium flex-1">{item.label}</span>
-                {item.shortcut && (
-                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 text-textLight opacity-0 group-hover:opacity-100 transition-opacity">
-                    ⌘{item.shortcut}
-                  </span>
-                )}
-                {currentView === item.view && <ChevronRight className="w-4 h-4 text-primary/60" />}
-              </button>
-            ))}
+          {/* Navigation */}
+          <nav className="space-y-1.5 flex-1">
+            {navItems.map(item => {
+              const isActive = currentView === item.view;
+              const isEnabled = analysisData || item.alwaysEnabled;
+              return (
+                <button
+                  key={item.view}
+                  onClick={() => { if (isEnabled) { setCurrentView(item.view); setSidebarOpen(false); } }}
+                  disabled={!isEnabled}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 text-left group relative overflow-hidden
+                    ${isActive
+                      ? 'shadow-neu-flat text-primary font-semibold'
+                      : isEnabled
+                        ? 'text-textLight hover:text-textMain hover:shadow-neu-sm'
+                        : 'text-textLight/30 cursor-not-allowed'
+                    }`}
+                  style={isActive ? { border: '1px solid var(--border)' } : {}}
+                >
+                  {/* Active indicator bar */}
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full" style={{ background: 'var(--gradient-primary)' }} />
+                  )}
+                  <span className={`transition-colors ${isActive ? 'text-primary' : ''}`}>{item.icon}</span>
+                  <span className="flex-1 text-sm">{item.label}</span>
+                  {item.shortcut && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/5 text-textLight opacity-0 group-hover:opacity-100 transition-opacity">
+                      ⌘{item.shortcut}
+                    </span>
+                  )}
+                  {isActive && <ChevronRight className="w-3.5 h-3.5 text-primary/50" />}
+                </button>
+              );
+            })}
           </nav>
 
-          {/* Theme + Export */}
-          <div className="space-y-3 mt-auto pt-4">
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-background rounded-2xl shadow-neu-flat hover:shadow-neu-sm transition-all duration-300 active:shadow-neu-pressed group"
-              style={{ border: '1px solid var(--card-border)' }}
-            >
+          {/* ── Bottom Actions ── */}
+          <div className="space-y-2.5 mt-auto pt-6 border-t" style={{ borderColor: 'var(--border)' }}>
+
+            {/* Theme toggle */}
+            <button onClick={toggleTheme} className="btn-ghost w-full flex items-center justify-center gap-2 text-sm">
               {dark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
-              <span className="font-medium text-sm text-textLight group-hover:text-textMain transition-colors">
-                {dark ? 'Light Mode' : 'Dark Mode'}
-              </span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/5 text-textLight">⌘D</span>
+              <span>{dark ? 'Light Mode' : 'Dark Mode'}</span>
+              <span className="text-[9px] font-mono ml-auto px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/5 text-textLight">⌘D</span>
             </button>
 
-            <button
-              onClick={() => handleExport('latex')}
-              disabled={!analysisData || exporting}
-              className="w-full flex items-center justify-center space-x-2 py-3.5 px-4 bg-background rounded-2xl shadow-neu-flat hover:shadow-neu-sm transition-all duration-300 active:shadow-neu-pressed group disabled:opacity-40 disabled:cursor-not-allowed"
-              style={{ border: '1px solid var(--card-border)' }}
-            >
-              <Download className="w-4 h-4 text-textLight group-hover:text-primary transition-colors" />
-              <span className="font-semibold text-sm group-hover:text-primary transition-colors">
-                {exporting ? 'Exporting...' : 'Export to LaTeX'}
-              </span>
-            </button>
-            <button
-              onClick={() => handleExport('markdown')}
-              disabled={!analysisData || exporting}
-              className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-background rounded-2xl shadow-neu-flat hover:shadow-neu-sm transition-all duration-300 active:shadow-neu-pressed group disabled:opacity-40 disabled:cursor-not-allowed text-sm"
-              style={{ border: '1px solid var(--card-border)' }}
-            >
-              <FileText className="w-4 h-4 text-textLight group-hover:text-primary transition-colors" />
-              <span className="font-medium text-textLight group-hover:text-primary transition-colors">Export Markdown</span>
-            </button>
-            <button
-              onClick={handleBibtex}
-              disabled={!analysisData}
-              className="w-full flex items-center justify-center space-x-2 py-3 px-4 bg-background rounded-2xl shadow-neu-flat hover:shadow-neu-sm transition-all duration-300 active:shadow-neu-pressed group disabled:opacity-40 disabled:cursor-not-allowed text-sm"
-              style={{ border: '1px solid var(--card-border)' }}
-            >
-              <BookMarked className="w-4 h-4 text-textLight group-hover:text-primary transition-colors" />
-              <span className="font-medium text-textLight group-hover:text-primary transition-colors">Cite (BibTeX)</span>
+            {/* Export buttons */}
+            <button onClick={() => handleExport('latex')} disabled={!analysisData || exporting}
+              className="btn-ghost w-full flex items-center justify-center gap-2 text-sm">
+              <Download className="w-4 h-4" />
+              <span>{exporting ? 'Exporting…' : 'Export LaTeX'}</span>
             </button>
 
-            {/* Shortcuts hint */}
-            <div className="flex items-center justify-center gap-1 text-[10px] text-textLight pt-1 opacity-60">
-              <Keyboard className="w-3 h-3" /> Shortcuts: ⌘U ⌘H ⌘E ⌘D
+            <button onClick={() => handleExport('markdown')} disabled={!analysisData || exporting}
+              className="btn-ghost w-full flex items-center justify-center gap-2 text-sm">
+              <FileText className="w-4 h-4" />
+              <span>Export Markdown</span>
+            </button>
+
+            <button onClick={handleBibtex} disabled={!analysisData}
+              className="btn-ghost w-full flex items-center justify-center gap-2 text-sm">
+              <BookMarked className="w-4 h-4" />
+              <span>Cite BibTeX</span>
+            </button>
+
+            <div className="flex items-center justify-center gap-1 text-[9px] text-textLight pt-2 opacity-40">
+              <Keyboard className="w-3 h-3" /> ⌘U · ⌘H · ⌘E · ⌘D
             </div>
           </div>
         </aside>
 
-        {/* ───── Main Content ───── */}
-        <main className="flex-1 p-8 lg:pr-12 lg:pl-4 flex flex-col min-w-0 pl-4 pr-4 pt-20 lg:pt-8">
+        {/* ═══════════ MAIN CONTENT ═══════════ */}
+        <main className="flex-1 p-6 lg:pr-10 lg:pl-4 flex flex-col min-w-0 pt-20 lg:pt-6">
+          {/* Header */}
           <header className="flex justify-between items-end mb-8 flex-wrap gap-4">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">
+              <h2 className="text-3xl font-extrabold tracking-tight">
                 {currentView === 'upload' && 'Document Ingestion'}
                 {currentView === 'history' && 'Analysis History'}
-                {currentView === 'analysis' && (analysisData?.extracted_data?.metadata?.title || 'Full Analysis')}
+                {currentView === 'analysis' && (
+                  <span className="text-gradient">
+                    {analysisData?.extracted_data?.metadata?.title?.slice(0, 60) || 'Full Analysis'}
+                    {(analysisData?.extracted_data?.metadata?.title?.length || 0) > 60 ? '…' : ''}
+                  </span>
+                )}
               </h2>
-              <p className="text-textLight mt-2 text-sm">
+              <p className="text-textLight mt-1.5 text-sm font-medium">
                 {currentView === 'upload' && 'Upload academic PDFs to begin the Deterministic GraphRAG extraction.'}
                 {currentView === 'history' && 'View and reload your previously analyzed research papers.'}
-                {currentView === 'analysis' && 'Metadata, Methodology Matrix, Gap Radar, and Contradiction Engine — all in one view.'}
+                {currentView === 'analysis' && 'Metadata · Methodology · Gap Radar · Contradiction Engine'}
               </p>
             </div>
             {analysisData && currentView === 'analysis' && (
-              <button
-                onClick={() => { setAnalysisData(null); setCurrentView('upload'); }}
-                className="btn-primary text-sm flex items-center space-x-2"
-              >
-                <UploadCloud className="w-4 h-4" /> <span>New Analysis</span>
+              <button onClick={() => { setAnalysisData(null); setCurrentView('upload'); }}
+                className="btn-primary text-sm flex items-center gap-2">
+                <Zap className="w-4 h-4" /> New Analysis
               </button>
             )}
           </header>
 
-          {/* Content Area with view transitions */}
+          {/* ── Content with entrance animations ── */}
           <div className="flex-1 overflow-y-auto" key={currentView}>
-            <div className="view-transition-enter">
+            <div className="view-enter">
               {currentView === 'upload' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
                   <section className="lg:col-span-2 flex flex-col">
                     <UploadDropzone onAnalysisComplete={handleAnalysisComplete} />
                   </section>
                   <section className="surface-neu flex flex-col overflow-hidden">
-                    <div className="p-6" style={{ borderBottom: '1px solid var(--card-border)' }}>
-                      <h3 className="font-bold text-lg flex items-center">
-                        <Activity className="w-5 h-5 mr-2 text-primary" /> Intelligence Engine
+                    <div className="p-6" style={{ borderBottom: '1px solid var(--border)' }}>
+                      <h3 className="font-bold text-sm flex items-center gap-2">
+                        <Activity className="w-4 h-4 text-primary" />
+                        <span>Intelligence Engine</span>
                       </h3>
                     </div>
-                    <div className="flex-1 p-6 overflow-y-auto">
-                      <div className="flex flex-col items-center justify-center h-full text-center">
-                        <div className="p-4 rounded-full surface-neu-pressed mb-4">
-                          <Activity className="w-8 h-8 text-textLight" />
-                        </div>
-                        <p className="text-textLight text-sm font-medium">Upload a PDF to activate the<br />extraction pipeline</p>
+                    <div className="flex-1 p-8 flex flex-col items-center justify-center text-center">
+                      <div className="w-16 h-16 rounded-2xl surface-neu-pressed flex items-center justify-center mb-5 animate-float">
+                        <Activity className="w-7 h-7 text-textLight" />
                       </div>
+                      <p className="text-textLight text-sm font-medium leading-relaxed">
+                        Upload a PDF to activate the<br />extraction pipeline
+                      </p>
                     </div>
                   </section>
                 </div>
@@ -291,22 +284,18 @@ function App() {
                 <HistoryView onLoadAnalysis={(data) => {
                   setAnalysisData(data);
                   setCurrentView('analysis');
-                  toast.success('Analysis loaded from history');
+                  toast.success('Analysis loaded from history ✓');
                 }} />
               )}
 
               {currentView === 'analysis' && analysisData && (
-                <ExtractedDataView
-                  data={analysisData.extracted_data}
-                  pipeline={analysisData.pipeline}
-                />
+                <ExtractedDataView data={analysisData.extracted_data} pipeline={analysisData.pipeline} />
               )}
             </div>
           </div>
         </main>
       </div>
 
-      {/* MathBot floating chat */}
       <MathBotChat />
     </>
   );

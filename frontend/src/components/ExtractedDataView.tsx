@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Database, AlertTriangle, Lightbulb, BookOpen, Users, BarChart3, Zap, FileText, Search, Calendar } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } from 'recharts';
+import { Database, AlertTriangle, Lightbulb, BookOpen, Users, BarChart3, Zap, FileText, Search, Calendar, TrendingUp } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, RadialBarChart, RadialBar, Legend } from 'recharts';
 import type { ExtractedInsights } from '../App';
 
 interface Props {
@@ -8,13 +8,12 @@ interface Props {
     pipeline: { chars_extracted: number; matrix_shape: number[]; cognee_success: boolean };
 }
 
-const CHART_COLORS = ['#4763ff', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16'];
+const CHART_COLORS = ['#4f6ef7', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#22d3ee', '#84cc16'];
 
 export default function ExtractedDataView({ data, pipeline }: Props) {
     const { metadata, methodologies, limitations, contradictions } = data;
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Filter all text content by search query
     const q = searchQuery.toLowerCase().trim();
     const filteredMethodologies = q ? methodologies.filter(m =>
         [...m.datasets, ...m.base_models, ...m.metrics, m.optimization || ''].some(s => s.toLowerCase().includes(q))
@@ -40,103 +39,114 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
         { name: 'Contradictions', count: contradictions.length },
     ];
 
-    return (
-        <div className="space-y-8 view-transition-enter">
+    // Radial data for the overview gauge
+    const totalItems = categoryData.reduce((s, d) => s + d.count, 0);
+    const radialData = [
+        { name: 'Extraction Depth', value: Math.min(totalItems * 5, 100), fill: '#4f6ef7' },
+    ];
 
-            {/* ─── Search Bar ───────────────────────────────────────────── */}
-            <div className="surface-neu p-4 flex items-center space-x-3">
+    return (
+        <div className="space-y-6 stagger-children">
+
+            {/* ─── Search Bar ─────────────────────────────────────── */}
+            <div className="surface-neu p-4 flex items-center gap-3 gradient-border">
                 <Search className="w-5 h-5 text-textLight shrink-0" />
                 <input
                     type="text"
-                    placeholder="Search datasets, models, metrics, gaps..."
+                    placeholder="Search datasets, models, metrics, gaps…"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent outline-none text-sm placeholder:text-textLight/50"
+                    className="flex-1 bg-transparent outline-none text-sm placeholder:text-textLight/40 font-medium"
                 />
                 {searchQuery && (
-                    <button onClick={() => setSearchQuery('')} className="text-xs text-primary font-medium hover:underline">
+                    <button onClick={() => setSearchQuery('')}
+                        className="text-xs font-semibold px-2 py-1 rounded-lg hover:bg-primary/10 text-primary transition-colors">
                         Clear
                     </button>
                 )}
             </div>
 
-            {/* ─── Pipeline Stats ────────────────────────────────────────── */}
+            {/* ─── Pipeline Stats ─────────────────────────────────── */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard icon={<FileText />} label="Characters" value={pipeline.chars_extracted.toLocaleString()} />
-                <StatCard icon={<BarChart3 />} label="Matrix" value={`${pipeline.matrix_shape[0]}×${pipeline.matrix_shape[1]}`} />
-                <StatCard icon={<Zap />} label="GraphRAG" value={pipeline.cognee_success ? 'Built ✓' : 'Skipped'} />
-                <StatCard icon={<Calendar />} label="Year" value={metadata.publication_year?.toString() || 'N/A'} />
+                <StatCard icon={<FileText className="w-5 h-5" />} label="Characters" value={pipeline.chars_extracted.toLocaleString()} color="#4f6ef7" />
+                <StatCard icon={<BarChart3 className="w-5 h-5" />} label="Matrix" value={`${pipeline.matrix_shape[0]}×${pipeline.matrix_shape[1]}`} color="#8b5cf6" />
+                <StatCard icon={<Zap className="w-5 h-5" />} label="GraphRAG" value={pipeline.cognee_success ? 'Built ✓' : 'Skipped'} color="#22d3ee" />
+                <StatCard icon={<Calendar className="w-5 h-5" />} label="Year" value={metadata.publication_year?.toString() || 'N/A'} color="#10b981" />
             </div>
 
-            {/* ─── Paper Metadata ────────────────────────────────────────── */}
+            {/* ─── Paper Metadata ─────────────────────────────────── */}
             <div className="surface-neu p-8">
-                <h3 className="text-xl font-bold mb-5 flex items-center">
-                    <BookOpen className="w-5 h-5 mr-3 text-primary" /> Paper Metadata
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--gradient-primary)' }}>
+                        <BookOpen className="w-4 h-4 text-white" />
+                    </span>
+                    Paper Metadata
                 </h3>
                 <div className="space-y-4">
                     <div className="surface-neu-pressed p-5 rounded-2xl">
-                        <p className="text-xs font-semibold text-textLight uppercase tracking-wider mb-1.5">Title</p>
-                        <p className="font-bold text-lg">{metadata.title}</p>
+                        <p className="text-[10px] font-bold text-textLight uppercase tracking-widest mb-1.5">Title</p>
+                        <p className="font-bold text-base leading-snug">{metadata.title}</p>
                     </div>
                     <div className="surface-neu-pressed p-5 rounded-2xl">
-                        <p className="text-xs font-semibold text-textLight uppercase tracking-wider mb-2">Authors</p>
+                        <p className="text-[10px] font-bold text-textLight uppercase tracking-widest mb-2.5">Authors</p>
                         <div className="flex flex-wrap gap-2">
                             {metadata.authors.map((a, i) => (
-                                <span key={i} className="inline-flex items-center px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
+                                <span key={i} className="badge" style={{ background: 'rgba(79,110,247,0.1)', color: 'var(--primary)' }}>
                                     <Users className="w-3 h-3 mr-1.5" /> {a.name}
                                 </span>
                             ))}
                         </div>
                     </div>
                     <div className="surface-neu-pressed p-5 rounded-2xl">
-                        <p className="text-xs font-semibold text-textLight uppercase tracking-wider mb-1.5">Abstract</p>
-                        <p className="text-sm leading-relaxed">{metadata.abstract}</p>
+                        <p className="text-[10px] font-bold text-textLight uppercase tracking-widest mb-1.5">Abstract</p>
+                        <p className="text-sm leading-relaxed text-textLight">{metadata.abstract}</p>
                     </div>
                 </div>
             </div>
 
-            {/* ─── Data Visualizations ───────────────────────────────────── */}
-            {(contradictions.length > 0 || categoryData.some(d => d.count > 0)) && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* ─── Data Visualizations ────────────────────────────── */}
+            {(contradictions.length > 0 || totalItems > 0) && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Extraction Overview Pie */}
                     <div className="surface-neu p-6">
-                        <h4 className="font-bold text-sm mb-4 flex items-center">
-                            <BarChart3 className="w-4 h-4 mr-2 text-primary" /> Extraction Overview
+                        <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-primary" /> Extraction Overview
                         </h4>
-                        <ResponsiveContainer width="100%" height={220}>
+                        <ResponsiveContainer width="100%" height={200}>
                             <PieChart>
                                 <Pie
                                     data={categoryData.filter(d => d.count > 0)}
                                     cx="50%" cy="50%"
-                                    innerRadius={55} outerRadius={85}
-                                    paddingAngle={3}
+                                    innerRadius={50} outerRadius={80}
+                                    paddingAngle={4}
                                     dataKey="count"
+                                    stroke="none"
                                     label={({ name, value }: { name?: string; value?: number }) => `${name || ''}: ${value || 0}`}
                                 >
                                     {categoryData.filter(d => d.count > 0).map((_, i) => (
                                         <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ background: 'var(--bg)', border: '1px solid var(--card-border)', borderRadius: '0.75rem', color: 'var(--text-main)' }} />
+                                <Tooltip contentStyle={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '0.75rem', color: 'var(--text-main)', fontFamily: 'Inter' }} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>
 
-                    {/* Contradiction Confidence Chart */}
+                    {/* Contradiction Confidence */}
                     {contradictions.length > 0 && (
                         <div className="surface-neu p-6">
-                            <h4 className="font-bold text-sm mb-4 flex items-center">
-                                <Zap className="w-4 h-4 mr-2 text-red-500" /> Contradiction Confidence
+                            <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-red-400" /> Contradiction Confidence
                             </h4>
-                            <ResponsiveContainer width="100%" height={220}>
-                                <BarChart data={confidenceData} barSize={28}>
-                                    <XAxis dataKey="name" tick={{ fill: 'var(--text-light)', fontSize: 12 }} axisLine={false} tickLine={false} />
-                                    <YAxis domain={[0, 100]} tick={{ fill: 'var(--text-light)', fontSize: 12 }} axisLine={false} tickLine={false} />
+                            <ResponsiveContainer width="100%" height={200}>
+                                <BarChart data={confidenceData} barSize={24}>
+                                    <XAxis dataKey="name" tick={{ fill: 'var(--text-light)', fontSize: 11, fontFamily: 'Inter' }} axisLine={false} tickLine={false} />
+                                    <YAxis domain={[0, 100]} tick={{ fill: 'var(--text-light)', fontSize: 11 }} axisLine={false} tickLine={false} />
                                     <Tooltip
                                         formatter={(v) => [`${v}%`, 'Confidence']}
-                                        contentStyle={{ background: 'var(--bg)', border: '1px solid var(--card-border)', borderRadius: '0.75rem', color: 'var(--text-main)' }}
+                                        contentStyle={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '0.75rem', color: 'var(--text-main)', fontFamily: 'Inter' }}
                                     />
-                                    <Bar dataKey="confidence" radius={[6, 6, 0, 0]}>
+                                    <Bar dataKey="confidence" radius={[8, 8, 0, 0]}>
                                         {confidenceData.map((entry, i) => (
                                             <Cell key={i} fill={entry.confidence > 70 ? '#ef4444' : entry.confidence > 40 ? '#f59e0b' : '#10b981'} />
                                         ))}
@@ -145,31 +155,50 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
                             </ResponsiveContainer>
                         </div>
                     )}
+
+                    {/* Depth Radial Gauge */}
+                    <div className="surface-neu p-6">
+                        <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
+                            <BarChart3 className="w-4 h-4 text-accent" /> Extraction Depth
+                        </h4>
+                        <ResponsiveContainer width="100%" height={200}>
+                            <RadialBarChart cx="50%" cy="50%" innerRadius="60%" outerRadius="90%" data={radialData} startAngle={180} endAngle={0}>
+                                <RadialBar background dataKey="value" cornerRadius={10} />
+                                <Legend iconSize={10} wrapperStyle={{ fontSize: 12, fontFamily: 'Inter', color: 'var(--text-light)' }} />
+                                <Tooltip contentStyle={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '0.75rem', fontFamily: 'Inter' }} />
+                            </RadialBarChart>
+                        </ResponsiveContainer>
+                        <p className="text-center text-2xl font-extrabold text-gradient -mt-6">{totalItems}</p>
+                        <p className="text-center text-[10px] text-textLight font-medium uppercase tracking-wider mt-1">Items Extracted</p>
+                    </div>
                 </div>
             )}
 
-            {/* ─── Methodology Matrix ───────────────────────────────────── */}
+            {/* ─── Methodology Matrix ─────────────────────────────── */}
             <div className="surface-neu p-8">
-                <h3 className="text-xl font-bold mb-5 flex items-center">
-                    <Database className="w-5 h-5 mr-3 text-primary" /> Methodology & Dataset Matrix
-                    {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredMethodologies.length} of {methodologies.length}</span>}
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
+                        <Database className="w-4 h-4 text-white" />
+                    </span>
+                    Methodology & Dataset Matrix
+                    {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredMethodologies.length}/{methodologies.length}</span>}
                 </h3>
                 {filteredMethodologies.length === 0 ? (
-                    <EmptyState message={q ? 'No methodologies match your search.' : 'No methodologies were extracted.'} />
+                    <EmptyState message={q ? 'No methodologies match your search.' : 'No methodologies extracted.'} />
                 ) : (
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                         {filteredMethodologies.map((m, i) => (
-                            <div key={i} className="surface-neu-pressed p-6 rounded-2xl">
-                                <h4 className="font-bold mb-4 flex items-center">
-                                    <Lightbulb className="w-4 h-4 mr-2 text-primary" /> Methodology {i + 1}
+                            <div key={i} className="surface-neu-pressed p-6 rounded-2xl gradient-border">
+                                <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
+                                    <Lightbulb className="w-4 h-4 text-primary" /> Methodology {i + 1}
                                 </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <TagRow label="Datasets" items={m.datasets} color="bg-blue-500/10 text-blue-700 dark:text-blue-300" />
-                                    <TagRow label="Base Models" items={m.base_models} color="bg-purple-500/10 text-purple-700 dark:text-purple-300" />
-                                    <TagRow label="Metrics" items={m.metrics} color="bg-green-500/10 text-green-700 dark:text-green-300" />
+                                    <TagRow label="Datasets" items={m.datasets} color="#4f6ef7" />
+                                    <TagRow label="Base Models" items={m.base_models} color="#8b5cf6" />
+                                    <TagRow label="Metrics" items={m.metrics} color="#10b981" />
                                     <div>
-                                        <p className="text-xs font-semibold text-textLight uppercase tracking-wider mb-2">Optimization</p>
-                                        <span className="inline-block px-3 py-1 rounded-full bg-orange-500/10 text-orange-700 dark:text-orange-300 text-sm font-medium">
+                                        <p className="text-[10px] font-bold text-textLight uppercase tracking-widest mb-2">Optimization</p>
+                                        <span className="badge" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b' }}>
                                             {m.optimization || 'N/A'}
                                         </span>
                                     </div>
@@ -180,27 +209,30 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
                 )}
             </div>
 
-            {/* ─── Research Gap Radar ────────────────────────────────────── */}
+            {/* ─── Research Gap Radar ─────────────────────────────── */}
             <div className="surface-neu p-8">
-                <h3 className="text-xl font-bold mb-5 flex items-center">
-                    <AlertTriangle className="w-5 h-5 mr-3 text-amber-500" /> Research Gap Radar
-                    {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredLimitations.length} of {limitations.length}</span>}
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)' }}>
+                        <AlertTriangle className="w-4 h-4 text-white" />
+                    </span>
+                    Research Gap Radar
+                    {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredLimitations.length}/{limitations.length}</span>}
                 </h3>
                 {filteredLimitations.length === 0 ? (
-                    <EmptyState message={q ? 'No gaps match your search.' : 'No limitations were extracted.'} />
+                    <EmptyState message={q ? 'No gaps match your search.' : 'No limitations extracted.'} />
                 ) : (
                     <div className="space-y-4">
                         {filteredLimitations.map((lim, i) => (
-                            <div key={i} className="surface-neu-pressed p-5 rounded-2xl">
+                            <div key={i} className="surface-neu-pressed p-5 rounded-2xl gradient-border">
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex-1">
-                                        <p className="font-semibold mb-2">{lim.description}</p>
-                                        <div className="bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl mt-2">
-                                            <p className="text-sm font-medium text-amber-700 dark:text-amber-300 italic">"{lim.source_context}"</p>
+                                        <p className="font-semibold text-sm mb-2">{lim.description}</p>
+                                        <div className="p-3 rounded-xl mt-2" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.15)' }}>
+                                            <p className="text-sm italic text-amber-600 dark:text-amber-300">"{lim.source_context}"</p>
                                         </div>
                                     </div>
                                     {lim.page_number && (
-                                        <span className="shrink-0 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">p. {lim.page_number}</span>
+                                        <span className="badge shrink-0" style={{ background: 'rgba(79,110,247,0.1)', color: 'var(--primary)' }}>p. {lim.page_number}</span>
                                     )}
                                 </div>
                             </div>
@@ -209,38 +241,42 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
                 )}
             </div>
 
-            {/* ─── Contradiction Engine ──────────────────────────────────── */}
+            {/* ─── Contradiction Engine ───────────────────────────── */}
             <div className="surface-neu p-8">
-                <h3 className="text-xl font-bold mb-5 flex items-center">
-                    <Zap className="w-5 h-5 mr-3 text-red-500" /> Contradiction Engine
-                    {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredContradictions.length} of {contradictions.length}</span>}
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-2.5">
+                    <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--gradient-danger)' }}>
+                        <Zap className="w-4 h-4 text-white" />
+                    </span>
+                    Contradiction Engine
+                    {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredContradictions.length}/{contradictions.length}</span>}
                 </h3>
                 {filteredContradictions.length === 0 ? (
-                    <EmptyState message={q ? 'No contradictions match your search.' : 'No contradictions were detected.'} />
+                    <EmptyState message={q ? 'No contradictions match.' : 'No contradictions detected.'} />
                 ) : (
                     <div className="space-y-4">
                         {filteredContradictions.map((c, i) => (
-                            <div key={i} className="surface-neu-pressed p-5 rounded-2xl">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-                                    <div className="bg-blue-500/10 border border-blue-500/20 p-3 rounded-xl">
-                                        <p className="text-xs font-bold text-blue-600 dark:text-blue-300 uppercase mb-1">Claim</p>
+                            <div key={i} className="surface-neu-pressed p-5 rounded-2xl gradient-border">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                                    <div className="p-3 rounded-xl" style={{ background: 'rgba(79,110,247,0.08)', border: '1px solid rgba(79,110,247,0.15)' }}>
+                                        <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--primary)' }}>Claim</p>
                                         <p className="text-sm font-medium">{c.claim}</p>
                                     </div>
-                                    <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
-                                        <p className="text-xs font-bold text-red-600 dark:text-red-300 uppercase mb-1">Opposing Claim</p>
+                                    <div className="p-3 rounded-xl" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                                        <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Opposing</p>
                                         <p className="text-sm font-medium">{c.opposing_claim}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center space-x-3">
+                                <div className="flex items-center gap-3">
                                     <div className="flex-1 h-2 rounded-full surface-neu-pressed overflow-hidden">
                                         <div
-                                            className={`h-full rounded-full transition-all duration-700 ${c.confidence_score > 0.7 ? 'bg-red-500' :
-                                                c.confidence_score > 0.4 ? 'bg-amber-500' : 'bg-green-500'
-                                                }`}
-                                            style={{ width: `${c.confidence_score * 100}%` }}
+                                            className="h-full rounded-full transition-all duration-1000 ease-out"
+                                            style={{
+                                                width: `${c.confidence_score * 100}%`,
+                                                background: c.confidence_score > 0.7 ? 'var(--gradient-danger)' : c.confidence_score > 0.4 ? 'linear-gradient(90deg, #f59e0b, #ef4444)' : 'var(--gradient-success)',
+                                            }}
                                         />
                                     </div>
-                                    <span className="text-sm font-bold">{(c.confidence_score * 100).toFixed(0)}%</span>
+                                    <span className="text-sm font-extrabold tabular-nums">{(c.confidence_score * 100).toFixed(0)}%</span>
                                 </div>
                             </div>
                         ))}
@@ -251,15 +287,17 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
     );
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ── Sub-components ──────────────────────────────────────────────────────
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
     return (
-        <div className="surface-neu p-4 flex items-center space-x-3">
-            <div className="p-2.5 rounded-xl surface-neu-pressed text-primary">{icon}</div>
+        <div className="surface-neu p-4 flex items-center gap-3 gradient-border">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${color}15`, color }}>
+                {icon}
+            </div>
             <div>
-                <p className="text-[10px] font-semibold text-textLight uppercase tracking-wider">{label}</p>
-                <p className="font-bold">{value}</p>
+                <p className="text-[10px] font-bold text-textLight uppercase tracking-widest">{label}</p>
+                <p className="font-extrabold text-base">{value}</p>
             </div>
         </div>
     );
@@ -268,10 +306,10 @@ function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string
 function TagRow({ label, items, color }: { label: string; items: string[]; color: string }) {
     return (
         <div>
-            <p className="text-xs font-semibold text-textLight uppercase tracking-wider mb-2">{label}</p>
+            <p className="text-[10px] font-bold text-textLight uppercase tracking-widest mb-2">{label}</p>
             <div className="flex flex-wrap gap-1.5">
                 {items.map((item, i) => (
-                    <span key={i} className={`inline-block px-2.5 py-1 rounded-full text-xs font-medium ${color}`}>{item}</span>
+                    <span key={i} className="badge" style={{ background: `${color}15`, color }}>{item}</span>
                 ))}
                 {items.length === 0 && <span className="text-xs text-textLight italic">None</span>}
             </div>
@@ -281,9 +319,9 @@ function TagRow({ label, items, color }: { label: string; items: string[]; color
 
 function EmptyState({ message }: { message: string }) {
     return (
-        <div className="flex flex-col items-center justify-center py-10 text-textLight">
-            <div className="p-3 rounded-full surface-neu-pressed mb-3">
-                <Database className="w-6 h-6" />
+        <div className="flex flex-col items-center justify-center py-12 text-textLight">
+            <div className="w-12 h-12 rounded-xl surface-neu-pressed flex items-center justify-center mb-3">
+                <Database className="w-5 h-5" />
             </div>
             <p className="text-sm font-medium">{message}</p>
         </div>
