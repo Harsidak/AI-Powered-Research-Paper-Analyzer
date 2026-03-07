@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, Download, GitMerge, Activity, Target, AlertTriangle, ChevronRight } from 'lucide-react';
+import { UploadCloud, FileText, Download, GitMerge, Activity, Target, AlertTriangle, ChevronRight, Clock } from 'lucide-react';
 import UploadDropzone from './components/UploadDropzone';
 import ExtractedDataView from './components/ExtractedDataView';
+import HistoryView from './components/HistoryView';
 import MathBotChat from './components/MathBotChat';
 
 // TypeScript interfaces matching backend Pydantic schemas
@@ -22,7 +23,7 @@ export interface AnalysisResult {
   extracted_data: ExtractedInsights;
 }
 
-type DashboardView = 'upload' | 'overview' | 'gaps' | 'methodologies' | 'contradictions';
+type DashboardView = 'upload' | 'history' | 'overview' | 'gaps' | 'methodologies' | 'contradictions';
 
 function App() {
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null);
@@ -58,8 +59,9 @@ function App() {
     }
   };
 
-  const navItems: { icon: React.ReactNode; label: string; view: DashboardView }[] = [
-    { icon: <UploadCloud />, label: 'Ingestion', view: 'upload' },
+  const navItems: { icon: React.ReactNode; label: string; view: DashboardView; alwaysEnabled?: boolean }[] = [
+    { icon: <UploadCloud />, label: 'Ingestion', view: 'upload', alwaysEnabled: true },
+    { icon: <Clock />, label: 'History', view: 'history', alwaysEnabled: true },
     { icon: <Target />, label: 'Gap Radar', view: 'gaps' },
     { icon: <GitMerge />, label: 'Methodologies', view: 'methodologies' },
     { icon: <AlertTriangle />, label: 'Contradictions', view: 'contradictions' },
@@ -85,16 +87,16 @@ function App() {
               <button
                 key={item.view}
                 onClick={() => {
-                  if (item.view === 'upload' || analysisData) setCurrentView(item.view);
+                  if (item.alwaysEnabled || analysisData) setCurrentView(item.view);
                 }}
                 className={`w-full flex items-center space-x-3 p-3 rounded-xl cursor-pointer transition-all duration-300 border border-transparent text-left
                   ${currentView === item.view
                     ? 'surface-neu text-primary'
-                    : analysisData || item.view === 'upload'
+                    : analysisData || item.alwaysEnabled
                       ? 'text-textLight hover:text-textMain hover:bg-white/10'
                       : 'text-gray-300 cursor-not-allowed'
                   }`}
-                disabled={!analysisData && item.view !== 'upload'}
+                disabled={!analysisData && !item.alwaysEnabled}
               >
                 <div className={`w-5 h-5 flex items-center justify-center ${currentView === item.view ? 'text-primary' : ''}`}>
                   {item.icon}
@@ -134,6 +136,7 @@ function App() {
             <div>
               <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
                 {currentView === 'upload' && 'Document Ingestion'}
+                {currentView === 'history' && 'Analysis History'}
                 {currentView === 'overview' && (analysisData?.extracted_data?.metadata?.title || 'Analysis Dashboard')}
                 {currentView === 'gaps' && 'Research Gap Radar'}
                 {currentView === 'methodologies' && 'Methodology & Dataset Matrix'}
@@ -141,13 +144,14 @@ function App() {
               </h2>
               <p className="text-textLight mt-2 text-sm">
                 {currentView === 'upload' && 'Upload academic PDFs to begin the Deterministic GraphRAG extraction.'}
+                {currentView === 'history' && 'View and reload your previously analyzed research papers.'}
                 {currentView === 'overview' && 'Full extraction overview — metadata, methodologies, gaps, and contradictions.'}
                 {currentView === 'gaps' && 'Automatically extracted limitations and future work suggestions.'}
                 {currentView === 'methodologies' && 'Side-by-side comparison of datasets, models, and metrics.'}
                 {currentView === 'contradictions' && 'Conflicting claims detected across the paper.'}
               </p>
             </div>
-            {analysisData && currentView !== 'upload' && (
+            {analysisData && currentView !== 'upload' && currentView !== 'history' && (
               <button
                 onClick={() => { setAnalysisData(null); setCurrentView('upload'); }}
                 className="btn-primary text-sm flex items-center space-x-2"
@@ -182,7 +186,14 @@ function App() {
               </div>
             )}
 
-            {analysisData && currentView !== 'upload' && (
+            {currentView === 'history' && (
+              <HistoryView onLoadAnalysis={(data) => {
+                setAnalysisData(data);
+                setCurrentView('overview');
+              }} />
+            )}
+
+            {analysisData && currentView !== 'upload' && currentView !== 'history' && (
               <ExtractedDataView
                 data={analysisData.extracted_data}
                 pipeline={analysisData.pipeline}

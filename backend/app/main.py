@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 import logging
 import json
+from datetime import datetime, timezone
 
 from app.core.security.pdf_validator import validate_pdf
 from app.services.mineru_extractor import MinerUExtractor
@@ -58,13 +59,53 @@ except Exception as e:
     logger.warning(f"Analytics router unavailable: {e}")
 
 TEMP_DIR = "/app/data/temp_files/"
+DATA_DIR = "/app/data/"
 if not os.path.exists("/app/data"):
     TEMP_DIR = "./data/temp_files/"
+    DATA_DIR = "./data/"
 os.makedirs(TEMP_DIR, exist_ok=True)
+os.makedirs(DATA_DIR, exist_ok=True)
+
+HISTORY_FILE = os.path.join(DATA_DIR, "history.json")
 
 # ─── In-memory store for the last analysis (local dev) ───────────────────────
-# In production, this would come from PostgreSQL
 _last_analysis: Dict[str, Any] = {}
+
+
+# ─── JSON File-Based History Store ───────────────────────────────────────────
+def _load_history() -> List[Dict[str, Any]]:
+    """Load all history entries from the JSON file."""
+    if not os.path.exists(HISTORY_FILE):
+        return []
+    try:
+        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, IOError):
+        logger.warning("History file corrupted, starting fresh.")
+        return []
+
+
+def _save_history(entries: List[Dict[str, Any]]):
+    """Persist the full history list to disk."""
+    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(entries, f, indent=2, default=str)
+
+
+def _save_to_history(analysis_id: str, filename: str, result: Dict[str, Any]):
+    """Append a new analysis result to history."""
+    entry = {
+        "id": analysis_id,
+        "filename": filename,
+        "title": result.get("extracted_data", {}).get("metadata", {}).get("title", "Untitled"),
+        "authors": [a.get("name", "") for a in result.get("extracted_data", {}).get("metadata", {}).get("authors", [])],
+        "analyzed_at": datetime.now(timezone.utc).isoformat(),
+        "pipeline": result.get("pipeline", {}),
+        "extracted_data": result.get("extracted_data", {}),
+    }
+    history = _load_history()
+    history.insert(0, entry)  # newest first
+    _save_history(history)
+    logger.info(f"Saved analysis '{entry['title']}' to history (ID: {analysis_id})")
 
 # ═════════════════════════════════════════════════════════════════════════════
 # ROUTE 1: Upload & Analyze (Synchronous — local dev)
@@ -152,14 +193,16 @@ async def upload_and_analyze(
 
         # Store in memory for MathBot chat context
         _last_analysis = {
-            "extracted_text": extracted_text[:8000],  # Keep first 8k chars for chat context
+            "extracted_text": extracted_text[:8000],
             "paper_title": paper_title,
             "raw_json": raw_json,
         }
 
-        return {
+        analysis_id = str(uuid.uuid4())
+        response_payload = {
             "status": "success",
             "message": "Pipeline executed successfully",
+            "id": analysis_id,
             "pipeline": {
                 "chars_extracted": len(extracted_text),
                 "matrix_shape": matrix_shape,
@@ -167,6 +210,11 @@ async def upload_and_analyze(
             },
             "extracted_data": raw_json
         }
+
+        # Auto-save to persistent history
+        _save_to_history(analysis_id, file.filename or "unknown.pdf", response_payload)
+
+        return response_payload
     except Exception as e:
         logger.error(f"Pipeline failed: {e}", exc_info=True)
         raise HTTPException(
@@ -370,6 +418,55 @@ def _escape_latex(text: str) -> str:
     for char, replacement in replacements.items():
         text = text.replace(char, replacement)
     return text
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# ROUTE 4: Analysis History
+# ═════════════════════════════════════════════════════════════════════════════
+@app.get("/api/v1/history")
+async def list_history():
+    """Return all past analyses (newest first), with lightweight summaries."""
+    history = _load_history()
+    # Return summaries without the full extracted_data to keep responses fast
+    summaries = []
+    for entry in history:
+        summaries.append({
+            "id": entry["id"],
+            "filename": entry.get("filename", "unknown.pdf"),
+            "title": entry.get("title", "Untitled"),
+            "authors": entry.get("authors", []),
+            "analyzed_at": entry.get("analyzed_at", ""),
+            "pipeline": entry.get("pipeline", {}),
+        })
+    return {"history": summaries, "total": len(summaries)}
+
+
+@app.get("/api/v1/history/{analysis_id}")
+async def get_history_entry(analysis_id: str):
+    """Retrieve the full analysis data for a specific history entry."""
+    history = _load_history()
+    for entry in history:
+        if entry["id"] == analysis_id:
+            return {
+                "status": "success",
+                "id": entry["id"],
+                "filename": entry.get("filename", "unknown.pdf"),
+                "analyzed_at": entry.get("analyzed_at", ""),
+                "pipeline": entry.get("pipeline", {}),
+                "extracted_data": entry.get("extracted_data", {}),
+            }
+    raise HTTPException(status_code=404, detail="Analysis not found")
+
+
+@app.delete("/api/v1/history/{analysis_id}")
+async def delete_history_entry(analysis_id: str):
+    """Delete a specific history entry."""
+    history = _load_history()
+    new_history = [e for e in history if e["id"] != analysis_id]
+    if len(new_history) == len(history):
+        raise HTTPException(status_code=404, detail="Analysis not found")
+    _save_history(new_history)
+    return {"status": "deleted", "id": analysis_id}
 
 
 # ═════════════════════════════════════════════════════════════════════════════
