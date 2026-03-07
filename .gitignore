@@ -49,6 +49,7 @@ Thumbs.db
 backend/data/temp_files/
 backend/data/lancedb/
 data/
+backend/tests/
 backend/test_output/
 # uv files
 .python-version

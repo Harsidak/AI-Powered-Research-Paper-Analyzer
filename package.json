@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@copilotkit/react-core": "^1.52.1",
-    "@copilotkit/react-textarea": "^1.52.1",
-    "@copilotkit/react-ui": "^1.52.1"
-  }
-}
