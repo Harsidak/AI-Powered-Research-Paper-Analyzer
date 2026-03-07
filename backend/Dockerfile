@@ -15,18 +15,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
-# ── Stage: Package Manager (The 'uv' Upgrade) ────────────────────────────────
-# Pull the lightning-fast uv package manager directly from the official source
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
 WORKDIR /app
 
 # ── Stage: Dependencies (Cached Layer) ───────────────────────────────────────
 COPY requirements.txt ./
 
-# Use uv to install. We force the CPU index for PyTorch to prevent 4GB CUDA bloat crashes
-# --system tells uv to install into the Docker container's global Python environment
-RUN uv pip install --system --no-cache -r requirements.txt \
+# Use pip to install. We force the CPU index for PyTorch to prevent 4GB CUDA bloat crashes
+RUN pip install --no-cache-dir -r requirements.txt \
     --extra-index-url https://download.pytorch.org/whl/cpu
 
 # ── Stage: Application Code ──────────────────────────────────────────────────
