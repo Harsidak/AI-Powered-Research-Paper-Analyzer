@@ -1,16 +1,12 @@
-from fastapi import FastAPI, UploadFile, File, BackgroundTasks, HTTPException, status, Depends
+from fastapi import FastAPI, UploadFile, File, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.orm import Session
-from typing import Dict, Any
+from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel
+from typing import Dict, Any, Optional, List
 import logging
+import json
 
-from app.services.extraction_worker import process_pdf_extraction
 from app.core.security.pdf_validator import validate_pdf
-from app.api.v1.copilot_router import copilotkit_sdk
-from copilotkit.integrations.fastapi import add_fastapi_endpoint
-from app.core.database import init_db, get_db
-from app.models.task import ExtractionTask
-from app.api.v1.endpoints.analytics import router as analytics_router
 from app.services.mineru_extractor import MinerUExtractor
 from app.services.lang_extract_engine import run_lang_extract_pipeline
 from app.services.statistical_engine import statistical_compute
@@ -22,12 +18,13 @@ import os
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-# Initialize database tables
+# Initialize database tables (graceful — won't crash if Postgres is down)
 try:
+    from app.core.database import init_db
     init_db()
     logger.info("Database tables verified/created successfully.")
 except Exception as e:
-    logger.error(f"Failed to initialize database: {e}")
+    logger.warning(f"Database unavailable (local mode): {e}")
 
 app = FastAPI(
     title="AI-Powered Research Paper Analyzer",
@@ -39,47 +36,60 @@ app = FastAPI(
 # CORS Configuration for the React Frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Update for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Mount the CopilotKit Router
-add_fastapi_endpoint(app, copilotkit_sdk, "/api/v1/copilotkit")
+# Mount CopilotKit (graceful — won't crash if dependency is broken)
+try:
+    from app.api.v1.copilot_router import copilotkit_sdk
+    from copilotkit.integrations.fastapi import add_fastapi_endpoint
+    add_fastapi_endpoint(app, copilotkit_sdk, "/api/v1/copilotkit")
+except Exception as e:
+    logger.warning(f"CopilotKit unavailable: {e}")
 
-# Register Analytics Endpoints
-app.include_router(analytics_router, prefix="/api/v1")
+# Register Analytics Endpoints (graceful)
+try:
+    from app.api.v1.endpoints.analytics import router as analytics_router
+    app.include_router(analytics_router, prefix="/api/v1")
+except Exception as e:
+    logger.warning(f"Analytics router unavailable: {e}")
 
 TEMP_DIR = "/app/data/temp_files/"
-# For local dev without docker, fallback to relative path if absolute fails
 if not os.path.exists("/app/data"):
     TEMP_DIR = "./data/temp_files/"
 os.makedirs(TEMP_DIR, exist_ok=True)
 
-@app.post("/api/v1/upload", status_code=status.HTTP_202_ACCEPTED)
-async def upload_document(
-    background_tasks: BackgroundTasks, 
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db)
+# ─── In-memory store for the last analysis (local dev) ───────────────────────
+# In production, this would come from PostgreSQL
+_last_analysis: Dict[str, Any] = {}
+
+# ═════════════════════════════════════════════════════════════════════════════
+# ROUTE 1: Upload & Analyze (Synchronous — local dev)
+# ═════════════════════════════════════════════════════════════════════════════
+@app.post("/api/v1/upload", status_code=status.HTTP_200_OK)
+async def upload_and_analyze(
+    file: UploadFile = File(...)
 ) -> Dict[str, Any]:
     """
-    Ingestion & Validation Gateway.
-    Accepts PDF files, inspects them at the byte-level via pdf_validator, 
-    and defers processing to the asynchronous worker queue if valid.
+    Full synchronous pipeline: Upload PDF → YOLO DLA → LangExtract → Pandas → Cognee.
+    Returns the complete ExtractedInsights JSON for the frontend dashboard.
     """
+    global _last_analysis
+
     if file.content_type != "application/pdf":
         raise HTTPException(
             status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
             detail={"error": "invalid_format", "message": "Only PDF files are supported"}
         )
 
-    # Read binary payload into memory safely (Limit to 50MB to prevent OOM)
     MAX_FILE_SIZE = 50 * 1024 * 1024
     try:
         file_bytes = await file.read(MAX_FILE_SIZE + 1)
         if len(file_bytes) > MAX_FILE_SIZE:
-             raise HTTPException(
+            raise HTTPException(
                 status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
                 detail={"error": "file_too_large", "message": "File size exceeds the 50MB limit."}
             )
@@ -92,126 +102,7 @@ async def upload_document(
             detail={"error": "read_failure", "message": "Failed to read file payload"}
         )
 
-    # Perform Defensive Validation (The Safety Shield)
-    is_valid, validation_msg = validate_pdf(file_bytes)
-    
-    if not is_valid:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail={"error": "validation_failed", "message": validation_msg}
-        )
-        
-    # Generate Unique Tracking IDs
-    task_id = str(uuid.uuid4())
-    user_id = "mock-user-1" 
-    
-    # Save to Local Blob Storage temporarily for Celery Worker to pick up
-    temp_file_path = os.path.join(TEMP_DIR, f"{task_id}.pdf")
-    try:
-         with open(temp_file_path, "wb") as f:
-            f.write(file_bytes)
-    except Exception as e:
-         logger.error(f"Failed to write physical file for celery worker: {e}")
-         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error": "write_failure", "message": "Failed to persist file to disk"}
-        )
-
-    # Create Task Record in Database
-    try:
-        new_task = ExtractionTask(
-            id=task_id,
-            user_id=user_id,
-            file_path=temp_file_path,
-            status="PENDING",
-            progress=0.0
-        )
-        db.add(new_task)
-        db.commit()
-    except Exception as e:
-        logger.error(f"Failed to create task in DB: {e}")
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error": "db_failure", "message": "Failed to initialize tracking task"}
-        )
-
-    # PUSH TO MESSAGE BROKER (Async Orchestration)
-    # The '.delay()' command instantly places the payload into Redis and returns immediately
-    try:
-        process_pdf_extraction.delay(task_id, temp_file_path, user_id)
-        logger.info(f"Successfully queued Task ID: {task_id}")
-    except Exception as e:
-        logger.error(f"Failed to connect to Redis Broker: {e}")
-        # Consider a 503 Service Unavailable if the queue is fundamentally down
-        # We might also want to mark the DB task as FAILED here
-        new_task.status = "FAILED"
-        new_task.error_message = "Broker unavailable"
-        db.commit()
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"error": "broker_unavailable", "message": "The asynchronous processing queue is currently down."}
-        )
-
-    return {
-        "status": "accepted",
-        "task_id": task_id,
-        "message": "File successfully validated and queued for extraction."
-    }
-
-@app.get("/api/v1/status/{task_id}")
-def get_task_status(task_id: str, db: Session = Depends(get_db)):
-    """Retrieve the current status and progress of an extraction task."""
-    task = db.query(ExtractionTask).filter(ExtractionTask.id == task_id).first()
-    if not task:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Task not found"
-        )
-    return {
-        "task_id": task.id,
-        "status": task.status,
-        "progress": task.progress,
-        "paper_title": task.paper_title,
-        "error_message": task.error_message,
-        "result_data": task.result_data,
-        "created_at": task.created_at,
-        "updated_at": task.updated_at
-    }
-
-# Global Exception Handlers
-@app.post("/api/v1/analyze-sync", status_code=status.HTTP_200_OK)
-async def analyze_document_sync(
-    file: UploadFile = File(...)
-) -> Dict[str, Any]:
-    """
-    Synchronous full-pipeline execution for testing via Swagger UI.
-    Upload a PDF, it runs MinerU -> LangExtract -> Pandas -> Cognee and returns the payload.
-    """
-    if file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
-            detail="Only PDF files are supported"
-        )
-
-    MAX_FILE_SIZE = 50 * 1024 * 1024
-    try:
-        file_bytes = await file.read(MAX_FILE_SIZE + 1)
-        if len(file_bytes) > MAX_FILE_SIZE:
-             raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail={"error": "file_too_large", "message": "File size exceeds the 50MB limit."}
-            )
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Error reading file bytes: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={"error": "read_failure", "message": "Failed to read file payload"}
-        )
-
-    # Validate PDF
+    # Safety Shield
     is_valid, validation_msg = validate_pdf(file_bytes)
     if not is_valid:
         raise HTTPException(
@@ -219,7 +110,7 @@ async def analyze_document_sync(
             detail={"error": "validation_failed", "message": validation_msg}
         )
 
-    temp_file_path = os.path.join(TEMP_DIR, f"sync_test_{uuid.uuid4()}.pdf")
+    temp_file_path = os.path.join(TEMP_DIR, f"sync_{uuid.uuid4()}.pdf")
     try:
         with open(temp_file_path, "wb") as f:
             f.write(file_bytes)
@@ -231,69 +122,261 @@ async def analyze_document_sync(
         )
 
     try:
-        # 1. MinerU Vision Parsing
-        logger.info(f"Starting synchronous MinerU extraction for {temp_file_path}")
+        # 1. Custom YOLO DLA Extraction
+        logger.info(f"Starting YOLO DLA extraction for {temp_file_path}")
         extractor = MinerUExtractor()
         mineru_result = extractor.extract_document(file_path=temp_file_path)
         extracted_text = mineru_result["markdown"]
-        
-        # 2. Strict Pydantic Execution Pipeline
-        logger.info(f"Executing LangExtract pipeline...")
+
+        # 2. LangExtract Pydantic Schema Enforcement
+        logger.info("Executing LangExtract pipeline...")
         structured_data = run_lang_extract_pipeline(clean_text=extracted_text)
         paper_title = structured_data.metadata.title
         raw_json = structured_data.model_dump()
 
-        # 3. Statistical Engine (Path A - Pandas)
-        logger.info(f"Computing matrix trends...")
+        # 3. Statistical Engine (Pandas)
+        logger.info("Computing matrix trends...")
         df = statistical_compute.format_matrix(raw_json)
         matrix_shape = list(df.shape) if not df.empty else [0, 0]
-        
-        # 4. Relational Path (Cognee GraphRAG)
-        logger.info(f"Running Cognee ECL Pipeline...")
-        success = False
+
+        # 4. Cognee GraphRAG (non-blocking — failure doesn't crash pipeline)
+        logger.info("Running Cognee ECL Pipeline...")
+        cognee_success = False
         try:
-            success = await relational_builder.build_knowledge_graph(
-                raw_text=extracted_text, 
+            cognee_success = await relational_builder.build_knowledge_graph(
+                raw_text=extracted_text,
                 document_title=paper_title or "Unknown Document"
             )
         except Exception as cognee_err:
-            logger.warning(f"Cognee pipeline failed (likely max_tokens API limit), proceeding without graph: {cognee_err}")
-        
+            logger.warning(f"Cognee skipped: {cognee_err}")
+
+        # Store in memory for MathBot chat context
+        _last_analysis = {
+            "extracted_text": extracted_text[:8000],  # Keep first 8k chars for chat context
+            "paper_title": paper_title,
+            "raw_json": raw_json,
+        }
+
         return {
             "status": "success",
             "message": "Pipeline executed successfully",
-            "mineru": {
-                "chars_extracted": len(extracted_text)
-            },
-            "pandas": {
-                "matrix_shape": matrix_shape
-            },
-            "cognee": {
-                "success": success
+            "pipeline": {
+                "chars_extracted": len(extracted_text),
+                "matrix_shape": matrix_shape,
+                "cognee_success": cognee_success,
             },
             "extracted_data": raw_json
         }
     except Exception as e:
-        logger.error(f"Sync pipeline failed: {e}", exc_info=True)
+        logger.error(f"Pipeline failed: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e)
+            detail={"error": "pipeline_failure", "message": str(e)}
         )
     finally:
-        # 6. Cleanup Temporary File
         if os.path.exists(temp_file_path):
             try:
                 os.remove(temp_file_path)
-                logger.info(f"Cleaned up temporary file: {temp_file_path}")
+                logger.info(f"Cleaned up: {temp_file_path}")
             except Exception as cleanup_error:
-                logger.error(f"Failed to cleanup temp file {temp_file_path}: {cleanup_error}")
+                logger.error(f"Cleanup failed: {cleanup_error}")
 
 
+# ═════════════════════════════════════════════════════════════════════════════
+# ROUTE 2: MathBot Chat (Gemini-powered research assistant)
+# ═════════════════════════════════════════════════════════════════════════════
+class ChatRequest(BaseModel):
+    message: str
+    context: Optional[str] = None
+
+class ChatResponse(BaseModel):
+    reply: str
+
+@app.post("/api/v1/chat", response_model=ChatResponse)
+async def chat_with_mathbot(req: ChatRequest):
+    """
+    MathBot AI assistant — answers research questions using paper context.
+    Uses Gemini via LangChain for grounded, deterministic responses.
+    """
+    from langchain_google_genai import ChatGoogleGenerativeAI
+    from langchain_core.messages import SystemMessage, HumanMessage
+
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set")
+
+    # Build context from last analysis or from request
+    paper_context = req.context or ""
+    if not paper_context and _last_analysis:
+        paper_context = f"Paper: {_last_analysis.get('paper_title', 'Unknown')}\n\n{_last_analysis.get('extracted_text', '')}"
+
+    system_prompt = f"""You are MathBot, the Researcher Co-Pilot AI assistant for the AI-Powered Research Paper Analyzer.
+You answer questions about uploaded research papers using the extracted data below.
+Be precise, cite specific methodologies/datasets/limitations from the paper.
+If the question is beyond the paper's scope, say so honestly.
+
+PAPER CONTEXT:
+{paper_context[:6000]}
+"""
+
+    try:
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-2.5-flash",
+            google_api_key=api_key,
+            temperature=0.3,
+        )
+
+        messages = [
+            SystemMessage(content=system_prompt),
+            HumanMessage(content=req.message),
+        ]
+
+        response = llm.invoke(messages)
+        return ChatResponse(reply=response.content)
+
+    except Exception as e:
+        logger.error(f"MathBot error: {e}")
+        raise HTTPException(status_code=500, detail=f"MathBot failed: {str(e)}")
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# ROUTE 3: Export to LaTeX / Markdown
+# ═════════════════════════════════════════════════════════════════════════════
+class ExportRequest(BaseModel):
+    format: str = "latex"  # "latex" or "markdown"
+    extracted_data: Dict[str, Any]
+
+@app.post("/api/v1/export")
+async def export_document(req: ExportRequest):
+    """
+    Generates a LaTeX or Markdown template from the ExtractedInsights data.
+    Returns the raw text content as a downloadable file.
+    """
+    data = req.extracted_data
+    metadata = data.get("metadata", {})
+    methodologies = data.get("methodologies", [])
+    limitations = data.get("limitations", [])
+    contradictions = data.get("contradictions", [])
+
+    title = metadata.get("title", "Untitled Paper")
+    authors = ", ".join([a.get("name", "") for a in metadata.get("authors", [])])
+    abstract = metadata.get("abstract", "")
+    year = metadata.get("publication_year", "N/A")
+
+    if req.format == "latex":
+        lines = [
+            r"\documentclass{article}",
+            r"\usepackage[utf8]{inputenc}",
+            r"\usepackage{booktabs}",
+            r"\usepackage{geometry}",
+            r"\geometry{margin=1in}",
+            "",
+            rf"\title{{{_escape_latex(title)}}}",
+            rf"\author{{{_escape_latex(authors)}}}",
+            rf"\date{{{year}}}",
+            "",
+            r"\begin{document}",
+            r"\maketitle",
+            "",
+            r"\begin{abstract}",
+            _escape_latex(abstract),
+            r"\end{abstract}",
+            "",
+            r"\section{Methodology Matrix}",
+        ]
+
+        for i, m in enumerate(methodologies):
+            lines.append(rf"\subsection{{Methodology {i+1}}}")
+            lines.append(r"\begin{itemize}")
+            lines.append(rf"  \item \textbf{{Datasets}}: {_escape_latex(', '.join(m.get('datasets', [])))}")
+            lines.append(rf"  \item \textbf{{Base Models}}: {_escape_latex(', '.join(m.get('base_models', [])))}")
+            lines.append(rf"  \item \textbf{{Metrics}}: {_escape_latex(', '.join(m.get('metrics', [])))}")
+            lines.append(rf"  \item \textbf{{Optimization}}: {_escape_latex(m.get('optimization', 'N/A'))}")
+            lines.append(r"\end{itemize}")
+            lines.append("")
+
+        if limitations:
+            lines.append(r"\section{Research Gaps \& Limitations}")
+            lines.append(r"\begin{enumerate}")
+            for lim in limitations:
+                lines.append(rf"  \item {_escape_latex(lim.get('description', ''))} \textit{{(p. {lim.get('page_number', '?')})}}")
+            lines.append(r"\end{enumerate}")
+            lines.append("")
+
+        if contradictions:
+            lines.append(r"\section{Contradictions}")
+            lines.append(r"\begin{enumerate}")
+            for c in contradictions:
+                lines.append(rf"  \item \textbf{{Claim}}: {_escape_latex(c.get('claim', ''))}")
+                lines.append(rf"        \textbf{{Opposing}}: {_escape_latex(c.get('opposing_claim', ''))}")
+                lines.append(rf"        (Confidence: {c.get('confidence_score', 0):.0%})")
+            lines.append(r"\end{enumerate}")
+
+        lines.append("")
+        lines.append(r"\end{document}")
+
+        content = "\n".join(lines)
+        return PlainTextResponse(content, media_type="application/x-latex",
+                                 headers={"Content-Disposition": "attachment; filename=analysis.tex"})
+
+    else:  # markdown
+        lines = [
+            f"# {title}",
+            f"**Authors**: {authors}",
+            f"**Year**: {year}",
+            "",
+            "## Abstract",
+            abstract,
+            "",
+            "## Methodology Matrix",
+        ]
+
+        for i, m in enumerate(methodologies):
+            lines.append(f"### Methodology {i+1}")
+            lines.append(f"- **Datasets**: {', '.join(m.get('datasets', []))}")
+            lines.append(f"- **Base Models**: {', '.join(m.get('base_models', []))}")
+            lines.append(f"- **Metrics**: {', '.join(m.get('metrics', []))}")
+            lines.append(f"- **Optimization**: {m.get('optimization', 'N/A')}")
+            lines.append("")
+
+        if limitations:
+            lines.append("## Research Gaps & Limitations")
+            for i, lim in enumerate(limitations):
+                lines.append(f"{i+1}. {lim.get('description', '')} *(p. {lim.get('page_number', '?')})*")
+            lines.append("")
+
+        if contradictions:
+            lines.append("## Contradictions")
+            for i, c in enumerate(contradictions):
+                lines.append(f"{i+1}. **Claim**: {c.get('claim', '')}")
+                lines.append(f"   **Opposing**: {c.get('opposing_claim', '')}")
+                lines.append(f"   Confidence: {c.get('confidence_score', 0):.0%}")
+            lines.append("")
+
+        content = "\n".join(lines)
+        return PlainTextResponse(content, media_type="text/markdown",
+                                 headers={"Content-Disposition": "attachment; filename=analysis.md"})
+
+
+def _escape_latex(text: str) -> str:
+    """Escape special LaTeX characters."""
+    if not text:
+        return ""
+    replacements = {
+        '&': r'\&', '%': r'\%', '$': r'\$', '#': r'\#',
+        '_': r'\_', '{': r'\{', '}': r'\}', '~': r'\textasciitilde{}',
+        '^': r'\textasciicircum{}',
+    }
+    for char, replacement in replacements.items():
+        text = text.replace(char, replacement)
+    return text
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Global Exception Handler
+# ═════════════════════════════════════════════════════════════════════════════
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Fallback handler to prevent unstructured server crashes."""
     logger.error(f"Unhandled system error: {exc}", exc_info=True)
-    return {
-        "error": "internal_error",
-        "message": "An unexpected server error occurred."
-    }, status.HTTP_500_INTERNAL_SERVER_ERROR
+    return {"error": "internal_error", "message": "An unexpected server error occurred."}, 500
