@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UploadCloud, FileText, Download, GitMerge, Activity, Target, AlertTriangle, ChevronRight, Clock } from 'lucide-react';
+import { UploadCloud, FileText, Download, Activity, ChevronRight, Clock, BarChart3 } from 'lucide-react';
 import UploadDropzone from './components/UploadDropzone';
 import ExtractedDataView from './components/ExtractedDataView';
 import HistoryView from './components/HistoryView';
@@ -23,7 +23,7 @@ export interface AnalysisResult {
   extracted_data: ExtractedInsights;
 }
 
-type DashboardView = 'upload' | 'history' | 'overview' | 'gaps' | 'methodologies' | 'contradictions';
+type DashboardView = 'upload' | 'history' | 'analysis';
 
 function App() {
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null);
@@ -32,7 +32,7 @@ function App() {
 
   const handleAnalysisComplete = (data: AnalysisResult) => {
     setAnalysisData(data);
-    setCurrentView('overview');
+    setCurrentView('analysis');
   };
 
   const handleExport = async (format: 'latex' | 'markdown') => {
@@ -61,10 +61,8 @@ function App() {
 
   const navItems: { icon: React.ReactNode; label: string; view: DashboardView; alwaysEnabled?: boolean }[] = [
     { icon: <UploadCloud />, label: 'Ingestion', view: 'upload', alwaysEnabled: true },
+    { icon: <BarChart3 />, label: 'Analysis', view: 'analysis' },
     { icon: <Clock />, label: 'History', view: 'history', alwaysEnabled: true },
-    { icon: <Target />, label: 'Gap Radar', view: 'gaps' },
-    { icon: <GitMerge />, label: 'Methodologies', view: 'methodologies' },
-    { icon: <AlertTriangle />, label: 'Contradictions', view: 'contradictions' },
   ];
 
   return (
@@ -137,21 +135,15 @@ function App() {
               <h2 className="text-3xl font-bold text-gray-800 tracking-tight">
                 {currentView === 'upload' && 'Document Ingestion'}
                 {currentView === 'history' && 'Analysis History'}
-                {currentView === 'overview' && (analysisData?.extracted_data?.metadata?.title || 'Analysis Dashboard')}
-                {currentView === 'gaps' && 'Research Gap Radar'}
-                {currentView === 'methodologies' && 'Methodology & Dataset Matrix'}
-                {currentView === 'contradictions' && 'Contradiction Engine'}
+                {currentView === 'analysis' && (analysisData?.extracted_data?.metadata?.title || 'Full Analysis')}
               </h2>
               <p className="text-textLight mt-2 text-sm">
                 {currentView === 'upload' && 'Upload academic PDFs to begin the Deterministic GraphRAG extraction.'}
                 {currentView === 'history' && 'View and reload your previously analyzed research papers.'}
-                {currentView === 'overview' && 'Full extraction overview — metadata, methodologies, gaps, and contradictions.'}
-                {currentView === 'gaps' && 'Automatically extracted limitations and future work suggestions.'}
-                {currentView === 'methodologies' && 'Side-by-side comparison of datasets, models, and metrics.'}
-                {currentView === 'contradictions' && 'Conflicting claims detected across the paper.'}
+                {currentView === 'analysis' && 'Metadata, Methodology Matrix, Gap Radar, and Contradiction Engine — all in one view.'}
               </p>
             </div>
-            {analysisData && currentView !== 'upload' && currentView !== 'history' && (
+            {analysisData && currentView === 'analysis' && (
               <button
                 onClick={() => { setAnalysisData(null); setCurrentView('upload'); }}
                 className="btn-primary text-sm flex items-center space-x-2"
@@ -161,8 +153,8 @@ function App() {
             )}
           </header>
 
-          {/* Dashboard Grid */}
-          <div className="flex-1">
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto">
             {currentView === 'upload' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                 <section className="lg:col-span-2 flex flex-col">
@@ -189,15 +181,14 @@ function App() {
             {currentView === 'history' && (
               <HistoryView onLoadAnalysis={(data) => {
                 setAnalysisData(data);
-                setCurrentView('overview');
+                setCurrentView('analysis');
               }} />
             )}
 
-            {analysisData && currentView !== 'upload' && currentView !== 'history' && (
+            {currentView === 'analysis' && analysisData && (
               <ExtractedDataView
                 data={analysisData.extracted_data}
                 pipeline={analysisData.pipeline}
-                currentView={currentView}
               />
             )}
           </div>
