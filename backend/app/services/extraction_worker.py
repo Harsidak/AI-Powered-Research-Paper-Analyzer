@@ -86,13 +86,27 @@ def process_pdf_extraction(self, task_id: str, file_path: str, user_id: str):
             self.update_state(state="SUCCESS", meta={"status": "COMPLETE", "progress": 100})
         update_db_task(task_id, "COMPLETE", 100.0, result_data=raw_json)
             
-        logger.info(f"Job {task_id} completed successfully.")
+        logger.info(f"Job {task_id} completed successfully. Cleaning up temp file.")
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
         return {"status": "COMPLETE", "task_id": task_id}
 
     except Exception as e:
         logger.error(f"Failed to process document {task_id}: {e}", exc_info=True)
         update_db_task(task_id, "FAILED", 0.0, error_message=str(e))
+        
         # We re-raise to let Celery's built in retry/failure mechanisms catch it
         if self:
-            raise self.retry(exc=e, countdown=60, max_retries=3)
+            try:
+                raise self.retry(exc=e, countdown=60, max_retries=3)
+            except Exception as retry_e:
+                # If we exceed max retries, cleanup the file
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+                raise retry_e
+        
+        # If not bound, just raise and cleanup
+        if os.path.exists(file_path):
+            os.remove(file_path)
         raise e

@@ -160,7 +160,7 @@ async def _chat_with_gemini_handler(message: str) -> str:
         from langchain_google_genai import ChatGoogleGenerativeAI
         from langchain_core.messages import HumanMessage, SystemMessage as SM
         llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash",
+            model="gemini-2.5-flash",
             google_api_key=os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY"),
         )
         response = await llm.ainvoke([

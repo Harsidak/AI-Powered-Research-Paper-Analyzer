@@ -53,7 +53,7 @@ class MinerUExtractor:
                 dataset = PymuDocDataset(pdf_bytes)
                 image_writer = FileBasedDataWriter(str(images_dir))
                 inference_result = doc_analyze(dataset)
-                pipe_result = inference_result.pipe_txt_mode(image_writer)
+                pipe_result = inference_result.pipe_ocr_mode(image_writer)
                 pdf_info_dict = json.loads(pipe_result.get_middle_json())
                 markdown_content = self._md_generator.generate(pdf_info_dict)
 

@@ -20,9 +20,8 @@ WORKDIR /app
 # ── Stage: Dependencies (Cached Layer) ───────────────────────────────────────
 COPY requirements.txt ./
 
-# Use pip to install. We force the CPU index for PyTorch to prevent 4GB CUDA bloat crashes
-RUN pip install --no-cache-dir -r requirements.txt \
-    --extra-index-url https://download.pytorch.org/whl/cpu
+# Use pip to install.
+RUN pip install --no-cache-dir -r requirements.txt
 
 # ── Stage: Application Code ──────────────────────────────────────────────────
 COPY . .

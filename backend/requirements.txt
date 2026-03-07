@@ -231,8 +231,7 @@ tiktoken
 tokenizers
 toml
 tomli
-# torch==2.10.0
-# torchvision==0.25.0
+
 tqdm
 traitlets
 transformers

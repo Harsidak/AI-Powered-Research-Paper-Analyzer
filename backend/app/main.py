@@ -74,10 +74,17 @@ async def upload_document(
             detail={"error": "invalid_format", "message": "Only PDF files are supported"}
         )
 
-    # Read binary payload into memory safely
-    # Note: For extremely large files, chunked reading and immediate streaming to disk is preferred.
+    # Read binary payload into memory safely (Limit to 50MB to prevent OOM)
+    MAX_FILE_SIZE = 50 * 1024 * 1024
     try:
-        file_bytes = await file.read()
+        file_bytes = await file.read(MAX_FILE_SIZE + 1)
+        if len(file_bytes) > MAX_FILE_SIZE:
+             raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail={"error": "file_too_large", "message": "File size exceeds the 50MB limit."}
+            )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error reading file bytes: {e}")
         raise HTTPException(
@@ -187,8 +194,16 @@ async def analyze_document_sync(
             detail="Only PDF files are supported"
         )
 
+    MAX_FILE_SIZE = 50 * 1024 * 1024
     try:
-        file_bytes = await file.read()
+        file_bytes = await file.read(MAX_FILE_SIZE + 1)
+        if len(file_bytes) > MAX_FILE_SIZE:
+             raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail={"error": "file_too_large", "message": "File size exceeds the 50MB limit."}
+            )
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error reading file bytes: {e}")
         raise HTTPException(
