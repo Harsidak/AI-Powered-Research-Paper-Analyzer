@@ -250,10 +250,14 @@ async def analyze_document_sync(
         
         # 4. Relational Path (Cognee GraphRAG)
         logger.info(f"Running Cognee ECL Pipeline...")
-        success = await relational_builder.build_knowledge_graph(
-            raw_text=extracted_text, 
-            document_title=paper_title or "Unknown Document"
-        )
+        success = False
+        try:
+            success = await relational_builder.build_knowledge_graph(
+                raw_text=extracted_text, 
+                document_title=paper_title or "Unknown Document"
+            )
+        except Exception as cognee_err:
+            logger.warning(f"Cognee pipeline failed (likely max_tokens API limit), proceeding without graph: {cognee_err}")
         
         return {
             "status": "success",
