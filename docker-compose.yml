@@ -1,7 +1,24 @@
-
+# ══════════════════════════════════════════════════════════════════════════════
+# Docker Compose — AI-Powered Research Paper Analyzer
+# Full-stack: Frontend (Nginx) + Backend (FastAPI) + Postgres + Redis
+# ══════════════════════════════════════════════════════════════════════════════
 
 services:
-  # ── FastAPI Backend ──────────────────────────────────────────────────────
+  # ── React Frontend (Nginx) ────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: paper-analyzer-frontend:latest
+    container_name: paper-analyzer-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── FastAPI Backend (API Gateway) ─────────────────────────────────────────
   api-gateway:
     build:
       context: ./backend
@@ -11,7 +28,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/app/data
+      - app_data:/app/data
     environment:
       - REDIS_URL=redis://db-redis:6379/0
       - DATABASE_URL=postgresql://postgres:postgres@db-postgres:5432/paper_analyzer
@@ -21,8 +38,10 @@ services:
         condition: service_healthy
       db-postgres:
         condition: service_healthy
+    restart: unless-stopped
 
-  # ── Celery Worker (runs MinerU + LangExtract + Cognee) ──────────────────
+  # ── Celery AI Worker (Background Pipeline) ────────────────────────────────
+  # Runs YOLO DLA → LangExtract → Pandas → Cognee asynchronously
   ai-worker:
     build:
       context: ./backend
@@ -31,7 +50,7 @@ services:
     container_name: paper-analyzer-worker
     command: celery -A app.core.celery_app worker --loglevel=info --concurrency=2
     volumes:
-      - ./data:/app/data
+      - app_data:/app/data
     environment:
       - REDIS_URL=redis://db-redis:6379/0
       - DATABASE_URL=postgresql://postgres:postgres@db-postgres:5432/paper_analyzer
@@ -41,8 +60,9 @@ services:
         condition: service_healthy
       db-postgres:
         condition: service_healthy
+    restart: unless-stopped
 
-  # ── PostgreSQL ──────────────────────────────────────────────────────────
+  # ── PostgreSQL (Relational DB) ────────────────────────────────────────────
   db-postgres:
     image: postgres:15-alpine
     container_name: paper-analyzer-postgres
@@ -59,8 +79,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
-  # ── Redis (Celery Broker) ───────────────────────────────────────────────
+  # ── Redis (Celery Message Broker) ─────────────────────────────────────────
   db-redis:
     image: redis:7-alpine
     container_name: paper-analyzer-redis
@@ -73,7 +94,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
 volumes:
+  app_data:
   redis_data:
   postgres_data:

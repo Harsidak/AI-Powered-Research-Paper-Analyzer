@@ -1,26 +1,16 @@
-# Python
-__pycache__/
-*.py[cod]
+__pycache__
+*.pyc
 *.pyo
-.venv/
-*.egg-info/
-
-# Test & Debug outputs
-test_output/
-test_imports.py
-test_full_pipeline.py
-resolve_error.txt
-
-# IDE / OS
-.vscode/
-.idea/
-*.swp
-.DS_Store
-Thumbs.db
-
-# Git
-.git/
+.git
 .gitignore
-
-# Misc
-*.log
+.env
+*.md
+.vscode
+.idea
+data/
+test_output/
+*.egg-info
+dist/
+build/
+.pytest_cache
+.mypy_cache
