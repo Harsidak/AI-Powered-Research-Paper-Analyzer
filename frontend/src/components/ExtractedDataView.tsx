@@ -5,7 +5,14 @@ import type { ExtractedInsights } from '../App';
 
 interface Props {
     data: ExtractedInsights;
-    pipeline: { chars_extracted: number; matrix_shape: number[]; cognee_success: boolean };
+    pipeline: {
+        chars_extracted: number;
+        matrix_shape: number[];
+        cognee_success: boolean;
+        graph_triplets?: number;
+        graph_nodes?: number;
+        graph_edges?: number;
+    };
 }
 
 const CHART_COLORS = ['#4f6ef7', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#22d3ee', '#84cc16'];
@@ -67,11 +74,12 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             </div>
 
             {/* ─── Pipeline Stats ─────────────────────────────────── */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                 <StatCard icon={<FileText className="w-5 h-5" />} label="Characters" value={pipeline.chars_extracted.toLocaleString()} color="#4f6ef7" />
                 <StatCard icon={<BarChart3 className="w-5 h-5" />} label="Matrix" value={`${pipeline.matrix_shape[0]}×${pipeline.matrix_shape[1]}`} color="#8b5cf6" />
-                <StatCard icon={<Zap className="w-5 h-5" />} label="GraphRAG" value={pipeline.cognee_success ? 'Built ✓' : 'Skipped'} color="#22d3ee" />
-                <StatCard icon={<Calendar className="w-5 h-5" />} label="Year" value={metadata.publication_year?.toString() || 'N/A'} color="#10b981" />
+                <StatCard icon={<Zap className="w-5 h-5" />} label="Triplets" value={pipeline.graph_triplets ? `${pipeline.graph_triplets} extracted` : (pipeline.cognee_success ? 'Built ✓' : 'Skipped')} color="#22d3ee" />
+                <StatCard icon={<Database className="w-5 h-5" />} label="Graph" value={pipeline.graph_nodes ? `${pipeline.graph_nodes}N · ${pipeline.graph_edges || 0}E` : 'N/A'} color="#10b981" />
+                <StatCard icon={<Calendar className="w-5 h-5" />} label="Year" value={metadata.publication_year?.toString() || 'N/A'} color="#f59e0b" />
             </div>
 
             {/* ─── Paper Metadata ─────────────────────────────────── */}

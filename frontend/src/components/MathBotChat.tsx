@@ -1,9 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, X, Send, Loader2, Sparkles } from 'lucide-react';
+import type { ExtractedInsights } from '../App';
 
 interface ChatMessage {
     role: 'user' | 'assistant';
     content: string;
+}
+
+interface Props {
+    analysisData?: ExtractedInsights | null;
 }
 
 const SUGGESTIONS = [
@@ -11,9 +16,11 @@ const SUGGESTIONS = [
     "What are the key limitations?",
     "What datasets were used?",
     "Find contradictions in the claims",
+    "Compare the evaluation metrics",
+    "What optimization techniques were used?",
 ];
 
-export default function MathBotChat() {
+export default function MathBotChat({ analysisData }: Props) {
     const [open, setOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([
         { role: 'assistant', content: "Hi! I'm MathBot 🧠 — your Researcher Co-Pilot. Upload a paper and ask me anything about its methodology, gaps, or contradictions." }
@@ -26,17 +33,73 @@ export default function MathBotChat() {
     useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 100); }, [open]);
     useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
+    // Update greeting when analysis data changes
+    useEffect(() => {
+        if (analysisData?.metadata?.title) {
+            const title = analysisData.metadata.title;
+            const truncTitle = title.length > 60 ? title.slice(0, 57) + '…' : title;
+            setMessages(prev => {
+                // Only update if the first message is the default greeting
+                if (prev.length === 1 && prev[0].role === 'assistant') {
+                    return [{ role: 'assistant', content: `📄 **${truncTitle}** loaded!\n\nI can help you explore this paper's methodology, limitations, contradictions, and more. What would you like to know?` }];
+                }
+                return prev;
+            });
+        }
+    }, [analysisData?.metadata?.title]);
+
     const sendMessage = async (text?: string) => {
         const msg = (text || input).trim();
         if (!msg || loading) return;
         setMessages(prev => [...prev, { role: 'user', content: msg }]);
         setInput('');
         setLoading(true);
+
+        // Build context string from analysis data so MathBot has structured info
+        let contextStr = '';
+        if (analysisData) {
+            const parts: string[] = [];
+            const meta = analysisData.metadata;
+            if (meta) {
+                parts.push(`Paper: ${meta.title}`);
+                parts.push(`Authors: ${meta.authors?.map(a => a.name).join(', ') || 'N/A'}`);
+                parts.push(`Year: ${meta.publication_year || 'N/A'}`);
+                parts.push(`Abstract: ${meta.abstract || 'N/A'}`);
+            }
+            if (analysisData.methodologies?.length) {
+                parts.push('\nMETHODOLOGIES:');
+                analysisData.methodologies.forEach((m, i) => {
+                    parts.push(`  ${i + 1}. Datasets: ${m.datasets?.join(', ') || 'N/A'}`);
+                    parts.push(`     Models: ${m.base_models?.join(', ') || 'N/A'}`);
+                    parts.push(`     Metrics: ${m.metrics?.join(', ') || 'N/A'}`);
+                    parts.push(`     Optimization: ${m.optimization || 'N/A'}`);
+                });
+            }
+            if (analysisData.limitations?.length) {
+                parts.push('\nLIMITATIONS:');
+                analysisData.limitations.forEach((l, i) => {
+                    parts.push(`  ${i + 1}. ${l.description}`);
+                });
+            }
+            if (analysisData.contradictions?.length) {
+                parts.push('\nCONTRADICTIONS:');
+                analysisData.contradictions.forEach((c, i) => {
+                    parts.push(`  ${i + 1}. Claim: ${c.claim}`);
+                    parts.push(`     Opposing: ${c.opposing_claim}`);
+                    parts.push(`     Confidence: ${Math.round(c.confidence_score * 100)}%`);
+                });
+            }
+            contextStr = parts.join('\n');
+        }
+
         try {
             const response = await fetch('/api/v1/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg }),
+                body: JSON.stringify({
+                    message: msg,
+                    ...(contextStr ? { context: contextStr } : {}),
+                }),
             });
             if (!response.ok) throw new Error(`Server error: ${response.status}`);
             const data = await response.json();
@@ -55,6 +118,8 @@ export default function MathBotChat() {
         if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     };
 
+    const hasAnalysis = !!analysisData?.metadata?.title;
+
     return (
         <>
             {/* FAB */}
@@ -68,6 +133,9 @@ export default function MathBotChat() {
                     aria-label="Open MathBot chat"
                 >
                     <MessageSquare size={22} />
+                    {hasAnalysis && (
+                        <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2" style={{ borderColor: 'var(--bg)' }} />
+                    )}
                 </button>
             )}
 
@@ -90,7 +158,9 @@ export default function MathBotChat() {
                             </div>
                             <div>
                                 <p className="font-bold text-sm">MathBot</p>
-                                <p className="text-[10px] opacity-70 font-medium">Researcher Co-Pilot</p>
+                                <p className="text-[10px] opacity-70 font-medium">
+                                    {hasAnalysis ? `Analyzing: ${analysisData!.metadata.title.slice(0, 30)}…` : 'Researcher Co-Pilot'}
+                                </p>
                             </div>
                         </div>
                         <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
@@ -144,7 +214,7 @@ export default function MathBotChat() {
                             value={input}
                             onChange={e => setInput(e.target.value)}
                             onKeyDown={onKeyDown}
-                            placeholder="Ask about the paper…"
+                            placeholder={hasAnalysis ? "Ask about the paper…" : "Upload a paper first…"}
                             disabled={loading}
                             className="flex-1 text-sm px-4 py-2.5 rounded-xl outline-none transition-all bg-transparent font-medium placeholder:text-textLight/40 surface-neu-pressed"
                             style={{ border: '1px solid var(--border)' }}

@@ -1,19 +1,23 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, JSONResponse
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
 import logging
 import json
 from datetime import datetime, timezone
+from dotenv import load_dotenv
+import uuid
+import os
+
+# Load .env FIRST so all API keys are available
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from app.core.security.pdf_validator import validate_pdf
 from app.services.mineru_extractor import MinerUExtractor
 from app.services.lang_extract_engine import run_lang_extract_pipeline
 from app.services.statistical_engine import statistical_compute
 from app.services.relational_engine import relational_builder
-import uuid
-import os
 
 # Configure logging for global exception routing
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -70,6 +74,21 @@ HISTORY_FILE = os.path.join(DATA_DIR, "history.json")
 
 # ─── In-memory store for the last analysis (local dev) ───────────────────────
 _last_analysis: Dict[str, Any] = {}
+
+# Restore last analysis from history on startup (survives server restarts)
+try:
+    _startup_history = _load_history()
+    if _startup_history:
+        _latest = _startup_history[0]
+        _extracted = _latest.get("extracted_data", {})
+        _last_analysis = {
+            "extracted_text": json.dumps(_extracted)[:8000],
+            "paper_title": _latest.get("title", "Unknown"),
+            "raw_json": _extracted,
+        }
+        logging.getLogger(__name__).info(f"Restored context from history: '{_latest.get('title', 'Unknown')}'")
+except Exception:
+    pass
 
 
 # ─── JSON File-Based History Store ───────────────────────────────────────────
@@ -255,18 +274,59 @@ async def chat_with_mathbot(req: ChatRequest):
     if not api_key:
         raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set")
 
-    # Build context from last analysis or from request
+    # Build rich context from last analysis — include structured data
     paper_context = req.context or ""
     if not paper_context and _last_analysis:
-        paper_context = f"Paper: {_last_analysis.get('paper_title', 'Unknown')}\n\n{_last_analysis.get('extracted_text', '')}"
+        raw_json = _last_analysis.get('raw_json', {})
+        title = _last_analysis.get('paper_title', 'Unknown')
+        
+        # Build structured context sections
+        ctx_parts = [f"Paper: {title}"]
+        
+        # Metadata
+        meta = raw_json.get('metadata', {})
+        if meta:
+            authors = ', '.join(a.get('name', '') for a in meta.get('authors', []))
+            ctx_parts.append(f"Authors: {authors}")
+            ctx_parts.append(f"Year: {meta.get('publication_year', 'N/A')}")
+            ctx_parts.append(f"Abstract: {meta.get('abstract', 'N/A')}")
+        
+        # Methodologies
+        methods = raw_json.get('methodologies', [])
+        if methods:
+            ctx_parts.append("\nMETHODOLOGIES:")
+            for i, m in enumerate(methods, 1):
+                ctx_parts.append(f"  {i}. Datasets: {', '.join(m.get('datasets', []))}")
+                ctx_parts.append(f"     Models: {', '.join(m.get('base_models', []))}")
+                ctx_parts.append(f"     Metrics: {', '.join(m.get('metrics', []))}")
+                ctx_parts.append(f"     Optimization: {m.get('optimization', 'N/A')}")
+        
+        # Limitations
+        lims = raw_json.get('limitations', [])
+        if lims:
+            ctx_parts.append("\nLIMITATIONS:")
+            for i, l in enumerate(lims, 1):
+                ctx_parts.append(f"  {i}. {l.get('description', '')}")
+        
+        # Contradictions
+        contras = raw_json.get('contradictions', [])
+        if contras:
+            ctx_parts.append("\nCONTRADICTIONS:")
+            for i, c in enumerate(contras, 1):
+                ctx_parts.append(f"  {i}. Claim: {c.get('claim', '')}")
+                ctx_parts.append(f"     Opposing: {c.get('opposing_claim', '')}")
+                ctx_parts.append(f"     Confidence: {c.get('confidence_score', 0):.0%}")
+        
+        paper_context = '\n'.join(ctx_parts)
 
     system_prompt = f"""You are MathBot, the Researcher Co-Pilot AI assistant for the AI-Powered Research Paper Analyzer.
-You answer questions about uploaded research papers using the extracted data below.
-Be precise, cite specific methodologies/datasets/limitations from the paper.
+You answer questions about uploaded research papers using the STRUCTURED ANALYSIS DATA below.
+Be precise, cite specific methodologies, datasets, metrics, limitations, and contradictions.
+Format your answers with bullet points and clear structure.
 If the question is beyond the paper's scope, say so honestly.
 
-PAPER CONTEXT:
-{paper_context[:6000]}
+ANALYSIS DATA:
+{paper_context[:8000]}
 """
 
     try:
@@ -522,4 +582,7 @@ async def delete_history_entry(analysis_id: str):
 async def global_exception_handler(request, exc):
     """Fallback handler to prevent unstructured server crashes."""
     logger.error(f"Unhandled system error: {exc}", exc_info=True)
-    return {"error": "internal_error", "message": "An unexpected server error occurred."}, 500
+    return JSONResponse(
+        status_code=500,
+        content={"error": "internal_error", "message": "An unexpected server error occurred."}
+    )

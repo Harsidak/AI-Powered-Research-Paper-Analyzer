@@ -25,7 +25,14 @@ export interface ExtractedInsights {
 }
 export interface AnalysisResult {
   status: string;
-  pipeline: { chars_extracted: number; matrix_shape: number[]; cognee_success: boolean; };
+  pipeline: {
+    chars_extracted: number;
+    matrix_shape: number[];
+    cognee_success: boolean;
+    graph_triplets?: number;
+    graph_nodes?: number;
+    graph_edges?: number;
+  };
   extracted_data: ExtractedInsights;
 }
 
@@ -296,7 +303,7 @@ function App() {
         </main>
       </div>
 
-      <MathBotChat />
+      <MathBotChat analysisData={analysisData?.extracted_data} />
     </>
   );
 }
