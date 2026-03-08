@@ -52,7 +52,7 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             </div>
 
             {/* ─── Paper Metadata ─────────────────────────────────── */}
-            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-500 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
 
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
@@ -89,7 +89,7 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             {(contradictions.length > 0 || totalItems > 0) && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Extraction Overview Pie */}
-                    <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-300">
                         <h4 className="font-bold text-sm mb-6 flex items-center gap-2">
                             <span className="glass-icon glass-icon-sm glass-blue group-hover:scale-110 transition-transform">
                                 <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
@@ -119,7 +119,7 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
 
                     {/* Contradiction Confidence */}
                     {contradictions.length > 0 && (
-                        <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                        <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-300">
                             <h4 className="font-bold text-sm mb-6 flex items-center gap-2">
                                 <span className="glass-icon glass-icon-sm glass-red group-hover:scale-110 transition-transform">
                                     <Zap className="w-3.5 h-3.5 text-red-500" />
@@ -145,7 +145,7 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
                     )}
 
                     {/* Depth Radial Gauge */}
-                    <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-300">
                         <h4 className="font-bold text-sm mb-6 flex items-center gap-2">
                             <span className="glass-icon glass-icon-sm glass-cyan group-hover:scale-110 transition-transform">
                                 <BarChart3 className="w-3.5 h-3.5 text-cyan-500" />
@@ -170,7 +170,7 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             )}
 
             {/* ─── Methodology Matrix ─────────────────────────────── */}
-            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-500 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
                     <span className="glass-icon glass-icon-lg glass-violet hover:scale-110 transition-transform">
@@ -207,7 +207,7 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             </div>
 
             {/* ─── Research Gap Radar ─────────────────────────────── */}
-            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-500 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
                     <span className="glass-icon glass-icon-lg glass-amber hover:scale-110 transition-transform">
@@ -241,7 +241,7 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             </div>
 
             {/* ─── Contradiction Engine ───────────────────────────── */}
-            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-500 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 blur-[80px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
                     <span className="glass-icon glass-icon-lg glass-red hover:scale-110 transition-transform">
@@ -299,7 +299,7 @@ function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label:
                         : color === '#ef4444' ? 'glass-red'
                             : 'glass-blue';
     return (
-        <div className="surface-neu p-4 flex items-center gap-3 gradient-border group hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-default">
+        <div className="surface-neu p-4 flex items-center gap-3 gradient-border group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-300 cursor-default">
             <div className={`glass-icon glass-icon-md ${glassClass} shrink-0 group-hover:scale-110 transition-transform`} style={{ color }}>
                 {icon}
             </div>

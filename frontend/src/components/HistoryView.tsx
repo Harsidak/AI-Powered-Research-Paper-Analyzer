@@ -129,7 +129,7 @@ export default function HistoryView({ onLoadAnalysis }: Props) {
                     key={entry.id}
                     onClick={() => loadEntry(entry.id)}
                     disabled={loadingId === entry.id}
-                    className="surface-neu w-full p-5 flex items-center gap-4 text-left group gradient-border"
+                    className="surface-neu w-full p-5 flex items-center gap-4 text-left group hover:-translate-y-1 hover:shadow-neu-glow transition-[box-shadow,transform,background-color] duration-300 gradient-border"
                 >
                     <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(79,110,247,0.1)' }}>
                         <FileText className="w-5 h-5 text-primary" />

@@ -181,9 +181,9 @@ function App() {
                   disabled={!isEnabled}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300 text-left group relative overflow-hidden
                     ${isActive
-                      ? 'shadow-neu-flat text-primary font-semibold'
+                      ? 'bg-white/5 dark:bg-white/10 text-primary font-semibold'
                       : isEnabled
-                        ? 'text-textLight hover:text-textMain hover:shadow-neu-sm'
+                        ? 'text-textLight hover:text-textMain hover:bg-white/5'
                         : 'text-textLight/30 cursor-not-allowed'
                     }`}
                   style={isActive ? { border: '1px solid var(--border)' } : {}}
