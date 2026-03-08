@@ -128,7 +128,14 @@ function App() {
         }}
       />
 
-      <div className="flex min-h-screen bg-background font-sans">
+      <div className="flex min-h-screen bg-background font-sans relative overflow-hidden">
+
+        {/* Breathtaking Ambient Background Mesh */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-40 dark:opacity-20 mix-blend-screen transition-opacity duration-1000">
+          <div className="absolute -top-[40%] -left-[10%] w-[70%] h-[70%] rounded-full bg-blue-500/30 blur-[120px]"></div>
+          <div className="absolute top-[20%] -right-[20%] w-[60%] h-[60%] rounded-full bg-cyan-400/20 blur-[120px]"></div>
+          <div className="absolute -bottom-[30%] left-[20%] w-[80%] h-[80%] rounded-full bg-violet-500/20 blur-[150px]"></div>
+        </div>
 
         {/* ───── Mobile Hamburger ───── */}
         <button
@@ -234,7 +241,7 @@ function App() {
         </aside>
 
         {/* ═══════════ MAIN CONTENT ═══════════ */}
-        <main className="flex-1 p-6 lg:pr-10 lg:pl-4 flex flex-col min-w-0 pt-20 lg:pt-6">
+        <main className="flex-1 p-6 lg:pr-10 lg:pl-4 flex flex-col min-w-0 pt-20 lg:pt-6 relative z-10">
           {/* Header */}
           <header className="flex justify-between items-end mb-8 flex-wrap gap-4">
             <div>

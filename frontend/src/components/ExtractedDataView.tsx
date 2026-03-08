@@ -52,12 +52,16 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             </div>
 
             {/* ─── Paper Metadata ─────────────────────────────────── */}
-            <div className="surface-neu p-8">
-                <h3 className="text-lg font-bold mb-5 flex items-center gap-3">
-                    <span className="glass-icon glass-icon-md glass-blue">
-                        <BookOpen className="w-4 h-4 text-blue-400" />
+            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 blur-[80px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                    <span className="glass-icon glass-icon-lg glass-blue">
+                        <BookOpen className="w-5 h-5 text-blue-500" />
                     </span>
-                    Paper Metadata
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-400">
+                        Paper Metadata
+                    </span>
                 </h3>
                 <div className="space-y-4">
                     <div className="surface-neu-pressed p-5 rounded-2xl">
@@ -85,12 +89,12 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             {(contradictions.length > 0 || totalItems > 0) && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Extraction Overview Pie */}
-                    <div className="surface-neu p-8">
+                    <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
                         <h4 className="font-bold text-sm mb-6 flex items-center gap-2">
-                            <span className="glass-icon glass-icon-sm glass-blue">
-                                <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
+                            <span className="glass-icon glass-icon-sm glass-blue group-hover:scale-110 transition-transform">
+                                <TrendingUp className="w-3.5 h-3.5 text-blue-500" />
                             </span>
-                            Extraction Overview
+                            <span className="text-textLight group-hover:text-textMain transition-colors">Extraction Overview</span>
                         </h4>
                         <ResponsiveContainer width="100%" height={220}>
                             <PieChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
@@ -115,12 +119,12 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
 
                     {/* Contradiction Confidence */}
                     {contradictions.length > 0 && (
-                        <div className="surface-neu p-8">
+                        <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
                             <h4 className="font-bold text-sm mb-6 flex items-center gap-2">
-                                <span className="glass-icon glass-icon-sm glass-red">
-                                    <Zap className="w-3.5 h-3.5 text-red-400" />
+                                <span className="glass-icon glass-icon-sm glass-red group-hover:scale-110 transition-transform">
+                                    <Zap className="w-3.5 h-3.5 text-red-500" />
                                 </span>
-                                Contradiction Confidence
+                                <span className="text-textLight group-hover:text-textMain transition-colors">Contradiction Confidence</span>
                             </h4>
                             <ResponsiveContainer width="100%" height={220}>
                                 <BarChart data={confidenceData} barSize={24} margin={{ top: 20, right: 30, left: 0, bottom: 20 }}>
@@ -141,12 +145,12 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
                     )}
 
                     {/* Depth Radial Gauge */}
-                    <div className="surface-neu p-8">
+                    <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
                         <h4 className="font-bold text-sm mb-6 flex items-center gap-2">
-                            <span className="glass-icon glass-icon-sm glass-cyan">
-                                <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+                            <span className="glass-icon glass-icon-sm glass-cyan group-hover:scale-110 transition-transform">
+                                <BarChart3 className="w-3.5 h-3.5 text-cyan-500" />
                             </span>
-                            Extraction Depth
+                            <span className="text-textLight group-hover:text-textMain transition-colors">Extraction Depth</span>
                         </h4>
                         <div className="relative">
                             <ResponsiveContainer width="100%" height={220}>
@@ -166,12 +170,15 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             )}
 
             {/* ─── Methodology Matrix ─────────────────────────────── */}
-            <div className="surface-neu p-8">
-                <h3 className="text-lg font-bold mb-6 flex items-center gap-3">
-                    <span className="glass-icon glass-icon-md glass-violet">
-                        <Database className="w-4 h-4 text-violet-400" />
+            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/5 blur-[80px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                    <span className="glass-icon glass-icon-lg glass-violet hover:scale-110 transition-transform">
+                        <Database className="w-5 h-5 text-violet-500" />
                     </span>
-                    Methodology & Dataset Matrix
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-fuchsia-400">
+                        Methodology & Dataset Matrix
+                    </span>
                 </h3>
                 {methodologies.length === 0 ? (
                     <EmptyState message={'No methodologies extracted.'} />
@@ -200,12 +207,15 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             </div>
 
             {/* ─── Research Gap Radar ─────────────────────────────── */}
-            <div className="surface-neu p-8">
-                <h3 className="text-lg font-bold mb-6 flex items-center gap-3">
-                    <span className="glass-icon glass-icon-md glass-amber">
-                        <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                    <span className="glass-icon glass-icon-lg glass-amber hover:scale-110 transition-transform">
+                        <AlertTriangle className="w-5 h-5 text-amber-500" />
                     </span>
-                    Research Gap Radar
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-400">
+                        Research Gap Radar
+                    </span>
                 </h3>
                 {limitations.length === 0 ? (
                     <EmptyState message={'No limitations extracted.'} />
@@ -231,12 +241,15 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
             </div>
 
             {/* ─── Contradiction Engine ───────────────────────────── */}
-            <div className="surface-neu p-8">
-                <h3 className="text-lg font-bold mb-6 flex items-center gap-3">
-                    <span className="glass-icon glass-icon-md glass-red">
-                        <Zap className="w-4 h-4 text-red-400" />
+            <div className="surface-neu p-8 group hover:-translate-y-1 hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 blur-[80px] rounded-full pointer-events-none -mr-20 -mt-20"></div>
+                <h3 className="text-xl font-bold mb-6 flex items-center gap-3">
+                    <span className="glass-icon glass-icon-lg glass-red hover:scale-110 transition-transform">
+                        <Zap className="w-5 h-5 text-red-500" />
                     </span>
-                    Contradiction Engine
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-rose-400">
+                        Contradiction Engine
+                    </span>
                 </h3>
                 {contradictions.length === 0 ? (
                     <EmptyState message={'No contradictions detected.'} />
@@ -286,8 +299,8 @@ function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label:
                         : color === '#ef4444' ? 'glass-red'
                             : 'glass-blue';
     return (
-        <div className="surface-neu p-4 flex items-center gap-3 gradient-border">
-            <div className={`glass-icon glass-icon-md ${glassClass} shrink-0`} style={{ color }}>
+        <div className="surface-neu p-4 flex items-center gap-3 gradient-border group hover:-translate-y-1 hover:shadow-lg transition-all duration-300 cursor-default">
+            <div className={`glass-icon glass-icon-md ${glassClass} shrink-0 group-hover:scale-110 transition-transform`} style={{ color }}>
                 {icon}
             </div>
             <div>
