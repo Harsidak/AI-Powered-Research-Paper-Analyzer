@@ -9,27 +9,34 @@
 Academic researchers often face an overwhelmingly complex literature landscape. Identifying research gaps and parsing complex PDF layouts (which contain two-column text, intricate tables, and raw mathematical equations) is highly manual and time-consuming. Traditional RAG systems fail when parsing structured academic papers because they treat documents as mere blobs of text, resulting in hallucinatory outputs and poor analytical reasoning when trying to connect distinct methodologies.
 
 ## Solution
-This project provides a sophisticated, deterministic LLM pipeline designed specifically for academic literature. It processes documents through a highly specific extraction and analysis architecture:
-1. **Multi-Modal Vision Parsing**: Accurately maps physical document geometry using LayoutLMv3/YOLOv8 to appropriately ingest two-column texts, tables, and mathematically transform equations to LaTeX natively.
-2. **Dual-Engine Analytics**: Uniquely splits the extracted schemas. A Statistical Engine runs complex mathematical computations (Trend & Saturation Analysis, Methodology Matrix) using Pandas, while a Relational Engine builds a highly interconnected, traversable Knowledge Graph (NetworkX/LanceDB) powered by the Cognee framework.
+This project provides a sophisticated, deterministic LLM pipeline designed specifically for academic literature. It processes documents through a highly specific extraction and analysis architecture using multi-modal vision parsing and dual-engine analytics.
 
-## Impact
-By systematically digesting and vectorizing papers conceptually, researchers save hundreds of hours on literature reviews. The architecture guarantees mathematically sound source grounding, dramatically reducing LLM hallucination. Users can effortlessly spot critical "Contradictions" in the field and rapidly unearth new research avenues through the dynamic "Gap Radar", completely transforming the pace of academic innovation and discovery.
+---
 
-## Features
-- **Deterministic GraphRAG Extraction**: Creates deterministic knowledge graphs where an LLM explicitly maps structural "Triplets" *(e.g., `Author -> CITES -> Paper -> USES -> Metric`)*.
-- **Dual-Engine Analytics**: Computes strict mathematical operations via Pandas (Statistical) and maps semantic memory via Cognee (Relational).
-- **Nuemorphic Copilot UI**: A visually stunning, strictly typed React dashboard built with TailwindCSS that features a seamlessly integrated CopilotKit AI Assistant.
-- **Ingestion Security Shield**: Byte-level middleware validating uploads against DRM or corruption via PyMuPDF.
-- **Continuous Async Orchestration**: Non-blocking extraction workflows scaled efficiently via a Celery worker pool and a Redis message broker.
+## 📚 Documentation & Deep Dives
+For a comprehensive understanding of the project, please refer to the following detailed documentation:
 
-## Tech Stack
-- **Frontend**: React (Vite, TypeScript), TailwindCSS (Nuemorphic constraints), CopilotKit, React Query, Lucide-React.
-- **Backend Application**: Python 3.11, FastAPI, Pydantic V2, Uvicorn.
-- **Message Broker & Queues**: Celery, Redis.
-- **Data Layer**: PostgreSQL, LanceDB, NetworkX.
-- **AI/ML Pipeline**: Cognee, LangExtract, PyMuPDF, Pandas, NumPy.
-- **Infrastructure**: Docker Compose, `uv` (Ultra-fast Rust-based Python package resolver).
+- **[Features & Capabilities](DOCS/Features.md)**: A deep dive into core functionalities like the "Research Gap" Radar, Contradiction Engine, and Ingestion Security Shield.
+- **[System Architecture & Pipeline](DOCS/pipeline.md)**: A 5-stage technical breakdown of the production-level data flow, from upload to deterministic user interaction.
+- **[Technology Stack](DOCS/tech_stack.md)**: Detailed overview of the strategically chosen tools for handles robust PDF extraction, asynchronous processing, and AI memory.
+- **[Cognify Technical Report](Cognify_Technical_Report.docx)**: The full technical project report (DOCX).
+
+## 🏗️ System Architecture
+![System Architecture Diagram](DOCS/Rough%20working.svg)
+*Refer to the [Core Execution Pipeline](DOCS/pipeline.md) for a detailed walkthrough of each stage.*
+
+## Key Features
+- **Deterministic GraphRAG**: LLM-mapped structural "Triplets" for hallucination-free retrieval.
+- **Dual-Engine Analytics**: Statistical (Pandas) and Relational (Cognee) processing paths.
+- **Premium Neumorphic UI**: A visually stunning React dashboard with integrated CopilotKit AI.
+- **Industrial Security Shield**: Byte-level middleware (PyMuPDF) validating all uploads.
+- **Asynchronous Orchestration**: Scalable Celery/Redis worker pool for non-blocking processing.
+
+## Tech Stack Highlights
+- **Backend**: FastAPI, Celery, Redis, `uv`, Pydantic V2.
+- **Frontend**: React (Vite), TailwindCSS, CopilotKit, React Query.
+- **AI/ML**: Cognee (Memory Layer), LangExtract (Structured Extraction), MinerU (Vision Parsing).
+- **Data**: PostgreSQL (Metadata), LanceDB (Vectors), NetworkX (Graphs).
 
 ## Setup Instructions
 
