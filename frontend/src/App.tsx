@@ -151,8 +151,8 @@ function App() {
 
           {/* Logo */}
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: 'var(--gradient-primary)' }}>
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="glass-icon glass-icon-md glass-blue animate-float">
+              <Sparkles className="w-5 h-5 text-blue-400" />
             </div>
             <div>
               <h1 className="text-base font-extrabold tracking-tight leading-tight">Researcher</h1>

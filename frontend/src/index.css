@@ -316,3 +316,238 @@
 .gradient-border:hover::before {
   opacity: 1;
 }
+
+/* ═══ Frosted Glassmorphism Icon System ═════════════════════════════════ */
+/* Inspired by modern macOS/iOS liquid glass aesthetic — frosted blur,
+   neon internal glow, semi-transparent gradient fills */
+
+.glass-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 1rem;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Inner frost overlay */
+.glass-icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  pointer-events: none;
+}
+
+/* Neon glow ring on hover */
+.glass-icon::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.glass-icon:hover::after {
+  opacity: 1;
+}
+
+.glass-icon:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* ── Size variants ── */
+.glass-icon-sm {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.glass-icon-md {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.glass-icon-lg {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+.glass-icon-xl {
+  width: 5rem;
+  height: 5rem;
+}
+
+/* ── Color variants ── */
+
+/* Blue (primary) */
+.glass-blue {
+  background: linear-gradient(135deg, rgba(79, 110, 247, 0.25) 0%, rgba(34, 211, 238, 0.12) 100%);
+  box-shadow:
+    0 4px 16px rgba(79, 110, 247, 0.2),
+    inset 0 0 20px rgba(79, 110, 247, 0.08);
+}
+.glass-blue::after {
+  background: linear-gradient(135deg, rgba(79, 110, 247, 0.5), rgba(34, 211, 238, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glass-blue:hover {
+  box-shadow:
+    0 8px 30px rgba(79, 110, 247, 0.35),
+    inset 0 0 30px rgba(79, 110, 247, 0.12);
+}
+
+/* Violet */
+.glass-violet {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25) 0%, rgba(99, 102, 241, 0.12) 100%);
+  box-shadow:
+    0 4px 16px rgba(139, 92, 246, 0.2),
+    inset 0 0 20px rgba(139, 92, 246, 0.08);
+}
+.glass-violet::after {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(99, 102, 241, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glass-violet:hover {
+  box-shadow:
+    0 8px 30px rgba(139, 92, 246, 0.35),
+    inset 0 0 30px rgba(139, 92, 246, 0.12);
+}
+
+/* Emerald (green) */
+.glass-emerald {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(34, 211, 238, 0.12) 100%);
+  box-shadow:
+    0 4px 16px rgba(16, 185, 129, 0.2),
+    inset 0 0 20px rgba(16, 185, 129, 0.08);
+}
+.glass-emerald::after {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(34, 211, 238, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glass-emerald:hover {
+  box-shadow:
+    0 8px 30px rgba(16, 185, 129, 0.35),
+    inset 0 0 30px rgba(16, 185, 129, 0.12);
+}
+
+/* Amber (warm) */
+.glass-amber {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(239, 68, 68, 0.12) 100%);
+  box-shadow:
+    0 4px 16px rgba(245, 158, 11, 0.2),
+    inset 0 0 20px rgba(245, 158, 11, 0.08);
+}
+.glass-amber::after {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.5), rgba(239, 68, 68, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glass-amber:hover {
+  box-shadow:
+    0 8px 30px rgba(245, 158, 11, 0.35),
+    inset 0 0 30px rgba(245, 158, 11, 0.12);
+}
+
+/* Red (danger) */
+.glass-red {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(249, 115, 22, 0.12) 100%);
+  box-shadow:
+    0 4px 16px rgba(239, 68, 68, 0.2),
+    inset 0 0 20px rgba(239, 68, 68, 0.08);
+}
+.glass-red::after {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(249, 115, 22, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glass-red:hover {
+  box-shadow:
+    0 8px 30px rgba(239, 68, 68, 0.35),
+    inset 0 0 30px rgba(239, 68, 68, 0.12);
+}
+
+/* Cyan */
+.glass-cyan {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.25) 0%, rgba(79, 110, 247, 0.12) 100%);
+  box-shadow:
+    0 4px 16px rgba(34, 211, 238, 0.2),
+    inset 0 0 20px rgba(34, 211, 238, 0.08);
+}
+.glass-cyan::after {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.5), rgba(79, 110, 247, 0.3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.glass-cyan:hover {
+  box-shadow:
+    0 8px 30px rgba(34, 211, 238, 0.35),
+    inset 0 0 30px rgba(34, 211, 238, 0.12);
+}
+
+/* Floating animation */
+.animate-float {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Animate slide-up for chat messages */
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale-in animation */
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Fade-in animation */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

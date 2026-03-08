@@ -94,10 +94,9 @@ export default function UploadDropzone({ onAnalysisComplete }: UploadDropzonePro
             >
                 {!file ? (
                     <div className="flex flex-col items-center animate-fade-in">
-                        <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-6 transition-all duration-500
-                            ${isDragging ? 'scale-110 shadow-neu-pressed' : 'shadow-neu-flat'}`}
-                            style={{ border: '1px solid var(--border)' }}>
-                            <Upload className={`w-9 h-9 transition-colors duration-300 ${isDragging ? 'text-primary' : 'text-textLight'}`} />
+                        <div className={`glass-icon glass-icon-xl glass-blue mb-6 transition-all duration-500
+                            ${isDragging ? 'scale-110 animate-float' : ''}`}>
+                            <Upload className={`w-9 h-9 transition-colors duration-300 ${isDragging ? 'text-blue-400' : 'text-blue-300/60'}`} />
                         </div>
                         <h3 className="text-xl font-bold mb-1.5">Drag & Drop PDF</h3>
                         <p className="text-sm text-textLight mb-7">or click to browse local files</p>
@@ -110,8 +109,8 @@ export default function UploadDropzone({ onAnalysisComplete }: UploadDropzonePro
                     <div className="flex flex-col items-center w-full max-w-md px-4 animate-scale-in">
                         {/* File info */}
                         <div className="surface-neu-pressed p-6 rounded-2xl mb-6 flex flex-col items-center w-full">
-                            <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-3" style={{ background: 'var(--gradient-primary)' }}>
-                                <File className="w-6 h-6 text-white" />
+                            <div className="glass-icon glass-icon-lg glass-blue mb-3">
+                                <File className="w-6 h-6 text-blue-400" />
                             </div>
                             <p className="font-bold text-center w-full truncate px-4">{file.name}</p>
                             <p className="text-xs text-textLight mt-1 font-medium">

@@ -84,9 +84,9 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
 
             {/* ─── Paper Metadata ─────────────────────────────────── */}
             <div className="surface-neu p-8">
-                <h3 className="text-lg font-bold mb-5 flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--gradient-primary)' }}>
-                        <BookOpen className="w-4 h-4 text-white" />
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-3">
+                    <span className="glass-icon glass-icon-md glass-blue">
+                        <BookOpen className="w-4 h-4 text-blue-400" />
                     </span>
                     Paper Metadata
                 </h3>
@@ -118,7 +118,10 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
                     {/* Extraction Overview Pie */}
                     <div className="surface-neu p-6">
                         <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
-                            <TrendingUp className="w-4 h-4 text-primary" /> Extraction Overview
+                            <span className="glass-icon glass-icon-sm glass-blue">
+                                <TrendingUp className="w-3.5 h-3.5 text-blue-400" />
+                            </span>
+                            Extraction Overview
                         </h4>
                         <ResponsiveContainer width="100%" height={200}>
                             <PieChart>
@@ -144,7 +147,10 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
                     {contradictions.length > 0 && (
                         <div className="surface-neu p-6">
                             <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
-                                <Zap className="w-4 h-4 text-red-400" /> Contradiction Confidence
+                                <span className="glass-icon glass-icon-sm glass-red">
+                                    <Zap className="w-3.5 h-3.5 text-red-400" />
+                                </span>
+                                Contradiction Confidence
                             </h4>
                             <ResponsiveContainer width="100%" height={200}>
                                 <BarChart data={confidenceData} barSize={24}>
@@ -167,7 +173,10 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
                     {/* Depth Radial Gauge */}
                     <div className="surface-neu p-6">
                         <h4 className="font-bold text-sm mb-4 flex items-center gap-2">
-                            <BarChart3 className="w-4 h-4 text-accent" /> Extraction Depth
+                            <span className="glass-icon glass-icon-sm glass-cyan">
+                                <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+                            </span>
+                            Extraction Depth
                         </h4>
                         <ResponsiveContainer width="100%" height={200}>
                             <RadialBarChart cx="50%" cy="50%" innerRadius="60%" outerRadius="90%" data={radialData} startAngle={180} endAngle={0}>
@@ -184,9 +193,9 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
 
             {/* ─── Methodology Matrix ─────────────────────────────── */}
             <div className="surface-neu p-8">
-                <h3 className="text-lg font-bold mb-5 flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
-                        <Database className="w-4 h-4 text-white" />
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-3">
+                    <span className="glass-icon glass-icon-md glass-violet">
+                        <Database className="w-4 h-4 text-violet-400" />
                     </span>
                     Methodology & Dataset Matrix
                     {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredMethodologies.length}/{methodologies.length}</span>}
@@ -219,9 +228,9 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
 
             {/* ─── Research Gap Radar ─────────────────────────────── */}
             <div className="surface-neu p-8">
-                <h3 className="text-lg font-bold mb-5 flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #f59e0b, #ef4444)' }}>
-                        <AlertTriangle className="w-4 h-4 text-white" />
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-3">
+                    <span className="glass-icon glass-icon-md glass-amber">
+                        <AlertTriangle className="w-4 h-4 text-amber-400" />
                     </span>
                     Research Gap Radar
                     {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredLimitations.length}/{limitations.length}</span>}
@@ -251,9 +260,9 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
 
             {/* ─── Contradiction Engine ───────────────────────────── */}
             <div className="surface-neu p-8">
-                <h3 className="text-lg font-bold mb-5 flex items-center gap-2.5">
-                    <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--gradient-danger)' }}>
-                        <Zap className="w-4 h-4 text-white" />
+                <h3 className="text-lg font-bold mb-5 flex items-center gap-3">
+                    <span className="glass-icon glass-icon-md glass-red">
+                        <Zap className="w-4 h-4 text-red-400" />
                     </span>
                     Contradiction Engine
                     {q && <span className="ml-auto text-xs text-textLight font-normal">{filteredContradictions.length}/{contradictions.length}</span>}
@@ -298,9 +307,16 @@ export default function ExtractedDataView({ data, pipeline }: Props) {
 // ── Sub-components ──────────────────────────────────────────────────────
 
 function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: string; color: string }) {
+    const glassClass = color === '#4f6ef7' ? 'glass-blue'
+        : color === '#8b5cf6' ? 'glass-violet'
+            : color === '#22d3ee' ? 'glass-cyan'
+                : color === '#10b981' ? 'glass-emerald'
+                    : color === '#f59e0b' ? 'glass-amber'
+                        : color === '#ef4444' ? 'glass-red'
+                            : 'glass-blue';
     return (
         <div className="surface-neu p-4 flex items-center gap-3 gradient-border">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${color}15`, color }}>
+            <div className={`glass-icon glass-icon-md ${glassClass} shrink-0`} style={{ color }}>
                 {icon}
             </div>
             <div>
@@ -328,8 +344,8 @@ function TagRow({ label, items, color }: { label: string; items: string[]; color
 function EmptyState({ message }: { message: string }) {
     return (
         <div className="flex flex-col items-center justify-center py-12 text-textLight">
-            <div className="w-12 h-12 rounded-xl surface-neu-pressed flex items-center justify-center mb-3">
-                <Database className="w-5 h-5" />
+            <div className="glass-icon glass-icon-lg glass-violet mb-3">
+                <Database className="w-5 h-5 text-violet-400" />
             </div>
             <p className="text-sm font-medium">{message}</p>
         </div>
