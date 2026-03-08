@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import {
   UploadCloud, FileText, Download, Activity, ChevronRight, Clock, BarChart3,
-  Sun, Moon, Menu, X, Keyboard, BookMarked, Sparkles, Zap
+  Sun, Moon, Menu, X, Keyboard, BookMarked, Sparkles, Zap, GitMerge
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import UploadDropzone from './components/UploadDropzone';
 import ExtractedDataView from './components/ExtractedDataView';
 import HistoryView from './components/HistoryView';
+import KnowledgeGraphView from './components/KnowledgeGraphView';
 import MathBotChat from './components/MathBotChat';
 import { useTheme } from './hooks/useTheme';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -36,7 +37,7 @@ export interface AnalysisResult {
   extracted_data: ExtractedInsights;
 }
 
-type DashboardView = 'upload' | 'history' | 'analysis';
+type DashboardView = 'upload' | 'history' | 'analysis' | 'graph';
 
 function App() {
   const [analysisData, setAnalysisData] = useState<AnalysisResult | null>(null);
@@ -55,7 +56,7 @@ function App() {
     if (!analysisData) return;
     setExporting(true);
     try {
-      const res = await fetch('/api/v1/export', {
+      const res = await fetch('http://localhost:8000/api/v1/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ format, extracted_data: analysisData.extracted_data }),
@@ -79,7 +80,7 @@ function App() {
   const handleBibtex = async () => {
     if (!analysisData) return;
     try {
-      const res = await fetch('/api/v1/export/bibtex', {
+      const res = await fetch('http://localhost:8000/api/v1/export/bibtex', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ extracted_data: analysisData.extracted_data }),
@@ -111,6 +112,7 @@ function App() {
   const navItems: { icon: React.ReactNode; label: string; view: DashboardView; alwaysEnabled?: boolean; shortcut?: string }[] = [
     { icon: <UploadCloud className="w-[18px] h-[18px]" />, label: 'Ingestion', view: 'upload', alwaysEnabled: true, shortcut: 'U' },
     { icon: <BarChart3 className="w-[18px] h-[18px]" />, label: 'Analysis', view: 'analysis', shortcut: 'A' },
+    { icon: <GitMerge className="w-[18px] h-[18px]" />, label: 'Graph', view: 'graph', shortcut: 'G' },
     { icon: <Clock className="w-[18px] h-[18px]" />, label: 'History', view: 'history', alwaysEnabled: true, shortcut: 'H' },
   ];
 
@@ -245,11 +247,13 @@ function App() {
                     {(analysisData?.extracted_data?.metadata?.title?.length || 0) > 60 ? '…' : ''}
                   </span>
                 )}
+                {currentView === 'graph' && 'Knowledge Graph'}
               </h2>
               <p className="text-textLight mt-1.5 text-sm font-medium">
                 {currentView === 'upload' && 'Upload academic PDFs to begin the Deterministic GraphRAG extraction.'}
                 {currentView === 'history' && 'View and reload your previously analyzed research papers.'}
                 {currentView === 'analysis' && 'Metadata · Methodology · Gap Radar · Contradiction Engine'}
+                {currentView === 'graph' && 'Interactive entity-relationship mapping of the research paper.'}
               </p>
             </div>
             {analysisData && currentView === 'analysis' && (
@@ -297,6 +301,10 @@ function App() {
 
               {currentView === 'analysis' && analysisData && (
                 <ExtractedDataView data={analysisData.extracted_data} pipeline={analysisData.pipeline} />
+              )}
+
+              {currentView === 'graph' && (
+                <KnowledgeGraphView />
               )}
             </div>
           </div>

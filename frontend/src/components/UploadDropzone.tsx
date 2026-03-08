@@ -59,7 +59,7 @@ export default function UploadDropzone({ onAnalysisComplete }: UploadDropzonePro
         ];
 
         try {
-            const response = await fetch('/api/v1/upload', { method: 'POST', body: formData });
+            const response = await fetch('http://localhost:8000/api/v1/upload', { method: 'POST', body: formData });
             stageTimers.forEach(clearTimeout);
             if (!response.ok) {
                 const err = await response.json().catch(() => ({ detail: 'Unknown error' }));

@@ -31,7 +31,7 @@ export default function HistoryView({ onLoadAnalysis }: Props) {
 
     const fetchHistory = async () => {
         try {
-            const res = await fetch('/api/v1/history');
+            const res = await fetch('http://localhost:8000/api/v1/history');
             if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
             // Backend returns { history: [...], total: N }
@@ -46,7 +46,7 @@ export default function HistoryView({ onLoadAnalysis }: Props) {
     const loadEntry = async (id: string) => {
         setLoadingId(id);
         try {
-            const res = await fetch(`/api/v1/history/${id}`);
+            const res = await fetch(`http://localhost:8000/api/v1/history/${id}`);
             if (!res.ok) throw new Error('Failed to load');
             const data = await res.json();
             // Map backend history response to AnalysisResult shape
@@ -65,7 +65,7 @@ export default function HistoryView({ onLoadAnalysis }: Props) {
     const deleteEntry = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         try {
-            const res = await fetch(`/api/v1/history/${id}`, { method: 'DELETE' });
+            const res = await fetch(`http://localhost:8000/api/v1/history/${id}`, { method: 'DELETE' });
             if (!res.ok) throw new Error('Delete failed');
             setEntries(prev => prev.filter(entry => entry.id !== id));
             toast.success('Entry removed');

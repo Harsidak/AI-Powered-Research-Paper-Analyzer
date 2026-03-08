@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, status
+from fastapi import FastAPI, UploadFile, File, HTTPException, status, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse, JSONResponse
 from pydantic import BaseModel
@@ -18,6 +18,7 @@ from app.services.mineru_extractor import MinerUExtractor
 from app.services.lang_extract_engine import run_lang_extract_pipeline
 from app.services.statistical_engine import statistical_compute
 from app.services.relational_engine import relational_builder
+from app.core.graph_db import memory_manager
 
 # Configure logging for global exception routing
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
@@ -110,7 +111,7 @@ def _save_history(entries: List[Dict[str, Any]]):
         json.dump(entries, f, indent=2, default=str)
 
 
-def _save_to_history(analysis_id: str, filename: str, result: Dict[str, Any]):
+def _save_to_history(analysis_id: str, filename: str, result: Dict[str, Any], graph_data: Dict[str, Any] = None):
     """Append a new analysis result to history."""
     entry = {
         "id": analysis_id,
@@ -120,6 +121,7 @@ def _save_to_history(analysis_id: str, filename: str, result: Dict[str, Any]):
         "analyzed_at": datetime.now(timezone.utc).isoformat(),
         "pipeline": result.get("pipeline", {}),
         "extracted_data": result.get("extracted_data", {}),
+        "graph_data": graph_data,  # Store the full knowledge graph
     }
     history = _load_history()
     history.insert(0, entry)  # newest first
@@ -131,7 +133,8 @@ def _save_to_history(analysis_id: str, filename: str, result: Dict[str, Any]):
 # ═════════════════════════════════════════════════════════════════════════════
 @app.post("/api/v1/upload", status_code=status.HTTP_200_OK)
 async def upload_and_analyze(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    background_tasks: BackgroundTasks = None
 ) -> Dict[str, Any]:
     """
     Full synchronous pipeline: Upload PDF → YOLO DLA → LangExtract → Pandas → Cognee.
@@ -170,12 +173,13 @@ async def upload_and_analyze(
             detail={"error": "validation_failed", "message": validation_msg}
         )
 
-    temp_file_path = os.path.join(TEMP_DIR, f"sync_{uuid.uuid4()}.pdf")
+    import tempfile
+    temp_file_path = os.path.join(tempfile.gettempdir(), f"paper_analyzer_{uuid.uuid4()}.pdf")
     try:
         with open(temp_file_path, "wb") as f:
             f.write(file_bytes)
     except Exception as e:
-        logger.error(f"Failed to write file to disk: {e}")
+        logger.error(f"Failed to write file to temp dir: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={"error": "write_failure", "message": "Failed to persist file to disk"}
@@ -209,11 +213,15 @@ async def upload_and_analyze(
         except Exception as graph_err:
             logger.warning(f"Knowledge graph skipped: {graph_err}")
 
-        # Store in memory for MathBot chat context
+        # Capture full graph data for persistence
+        graph_visualization_data = memory_manager.get_full_graph()
+
+        # Store in memory for MathBot chat context + graph visualization
         _last_analysis = {
             "extracted_text": extracted_text[:8000],
             "paper_title": paper_title,
             "raw_json": raw_json,
+            "graph_data": graph_visualization_data,
         }
 
         analysis_id = str(uuid.uuid4())
@@ -232,8 +240,18 @@ async def upload_and_analyze(
             "extracted_data": raw_json
         }
 
-        # Auto-save to persistent history
-        _save_to_history(analysis_id, file.filename or "unknown.pdf", response_payload)
+        # Auto-save to persistent history (including graph data) via background task
+        # This prevents Uvicorn's --reload watcher from dropping the connection mid-response
+        if background_tasks:
+            background_tasks.add_task(
+                _save_to_history,
+                analysis_id, 
+                file.filename or "unknown.pdf", 
+                response_payload, 
+                graph_visualization_data
+            )
+        else:
+            _save_to_history(analysis_id, file.filename or "unknown.pdf", response_payload, graph_visualization_data)
 
         return response_payload
     except Exception as e:
@@ -573,6 +591,43 @@ async def delete_history_entry(analysis_id: str):
         raise HTTPException(status_code=404, detail="Analysis not found")
     _save_history(new_history)
     return {"status": "deleted", "id": analysis_id}
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# ROUTE: Knowledge Graph Visualization Data
+# ═════════════════════════════════════════════════════════════════════════════
+@app.get("/api/v1/graph")
+async def get_graph_data():
+    """
+    Returns the full knowledge graph (nodes + edges) for visualization.
+    Tries:
+    1. In-memory graph (from current session's NetworkX)
+    2. In-memory _last_analysis cache (has graph_data from latest upload)
+    3. Latest history entry (persisted graph_data)
+    """
+    # 1. Try live NetworkX graph
+    live_graph = memory_manager.get_full_graph()
+    if live_graph["nodes"]:
+        return {"status": "success", "graph": live_graph}
+
+    # 2. Try in-memory cache
+    if _last_analysis.get("graph_data") and _last_analysis["graph_data"].get("nodes"):
+        return {"status": "success", "graph": _last_analysis["graph_data"]}
+
+    # 3. Try latest history entry
+    history = _load_history()
+    if history:
+        for entry in history:
+            graph_data = entry.get("graph_data")
+            if graph_data and graph_data.get("nodes"):
+                return {"status": "success", "graph": graph_data}
+
+    # No graph data available
+    return {
+        "status": "empty",
+        "graph": {"nodes": [], "edges": [], "stats": {"node_count": 0, "edge_count": 0}},
+        "message": "No knowledge graph available. Upload a paper to generate one.",
+    }
 
 
 # ═════════════════════════════════════════════════════════════════════════════

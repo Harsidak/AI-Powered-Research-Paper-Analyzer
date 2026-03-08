@@ -67,5 +67,74 @@ class GraphMemoryManager:
             "sample_edges": sample_edges,
         }
 
+    def get_full_graph(self) -> dict:
+        """
+        Serializes the full NetworkX graph into a frontend-friendly JSON structure
+        for the Knowledge Graph Visualization.
+        Returns nodes with degree-based sizing and edges with relation labels.
+        """
+        # Build node list with metadata for visualization
+        nodes = []
+        for node in self.graph.nodes():
+            # Compute visual properties based on graph structure
+            in_deg = self.graph.in_degree(node)
+            out_deg = self.graph.out_degree(node)
+            total_deg = in_deg + out_deg
+
+            # Determine node group by analyzing edge predicates
+            predicates = set()
+            for _, _, data in self.graph.in_edges(node, data=True):
+                predicates.add(data.get("relation", ""))
+            for _, _, data in self.graph.out_edges(node, data=True):
+                predicates.add(data.get("relation", ""))
+
+            # Assign color group based on relationship types
+            if any(p in predicates for p in ["AUTHORED_BY", "AFFILIATED_WITH"]):
+                group = "author"
+            elif any(p in predicates for p in ["USES_MODEL", "OPTIMIZED_WITH"]):
+                group = "model"
+            elif any(p in predicates for p in ["EVALUATES_ON"]):
+                group = "dataset"
+            elif any(p in predicates for p in ["MEASURES_WITH"]):
+                group = "metric"
+            elif any(p in predicates for p in ["HAS_LIMITATION"]):
+                group = "limitation"
+            elif any(p in predicates for p in ["CONTRADICTS"]):
+                group = "contradiction"
+            elif any(p in predicates for p in ["PUBLISHED_IN"]):
+                group = "metadata"
+            elif total_deg >= 3:
+                group = "hub"  # Central concept
+            else:
+                group = "concept"
+
+            nodes.append({
+                "id": node,
+                "label": node[:40] + ("…" if len(node) > 40 else ""),
+                "fullLabel": node,
+                "group": group,
+                "degree": total_deg,
+                "inDegree": in_deg,
+                "outDegree": out_deg,
+            })
+
+        # Build edge list
+        edges = []
+        for u, v, data in self.graph.edges(data=True):
+            edges.append({
+                "source": u,
+                "target": v,
+                "relation": data.get("relation", "RELATED_TO"),
+            })
+
+        return {
+            "nodes": nodes,
+            "edges": edges,
+            "stats": {
+                "node_count": len(nodes),
+                "edge_count": len(edges),
+            }
+        }
+
 # Singleton instance to be used by the Celery worker and the API
 memory_manager = GraphMemoryManager()

@@ -9,8 +9,10 @@ from PIL import Image
 logger = logging.getLogger(__name__)
 
 class MinerUExtractor:
-    def __init__(self, output_dir: str = "test_output"):
-        self.output_dir = Path(output_dir)
+    def __init__(self, output_dir: str = None):
+        import tempfile
+        base_dir = output_dir if output_dir else os.path.join(tempfile.gettempdir(), "paper_analyzer_test_output")
+        self.output_dir = Path(base_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.model = None
 
