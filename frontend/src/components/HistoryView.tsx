@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Clock, Calendar, Trash2, ArrowRight, FileText, Loader2 } from 'lucide-react';
+import { Clock, Calendar, Trash2, ArrowRight, FileText, Loader2, Users } from 'lucide-react';
 import toast from 'react-hot-toast';
 import type { AnalysisResult } from '../App';
 
 interface HistoryEntry {
     id: string;
+    filename: string;
     title: string;
-    date: string;
-    chars: number;
+    authors: string[];
+    analyzed_at: string;
+    pipeline: {
+        chars_extracted: number;
+        matrix_shape: number[];
+        cognee_success: boolean;
+    };
 }
 
 interface Props {
@@ -28,7 +34,8 @@ export default function HistoryView({ onLoadAnalysis }: Props) {
             const res = await fetch('/api/v1/history');
             if (!res.ok) throw new Error('Failed to fetch');
             const data = await res.json();
-            setEntries(data.entries || []);
+            // Backend returns { history: [...], total: N }
+            setEntries(data.history || []);
         } catch {
             toast.error('Could not load history');
         } finally {
@@ -42,7 +49,12 @@ export default function HistoryView({ onLoadAnalysis }: Props) {
             const res = await fetch(`/api/v1/history/${id}`);
             if (!res.ok) throw new Error('Failed to load');
             const data = await res.json();
-            onLoadAnalysis(data);
+            // Map backend history response to AnalysisResult shape
+            onLoadAnalysis({
+                status: data.status || 'success',
+                pipeline: data.pipeline || {},
+                extracted_data: data.extracted_data || {},
+            } as AnalysisResult);
         } catch {
             toast.error('Failed to load analysis');
         } finally {
@@ -59,6 +71,24 @@ export default function HistoryView({ onLoadAnalysis }: Props) {
             toast.success('Entry removed');
         } catch {
             toast.error('Could not delete entry');
+        }
+    };
+
+    const formatDate = (dateStr: string) => {
+        try {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        } catch {
+            return 'Unknown date';
+        }
+    };
+
+    const formatTime = (dateStr: string) => {
+        try {
+            const d = new Date(dateStr);
+            return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        } catch {
+            return '';
         }
     };
 
@@ -105,12 +135,22 @@ export default function HistoryView({ onLoadAnalysis }: Props) {
                         <FileText className="w-5 h-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="font-bold text-sm truncate group-hover:text-primary transition-colors">{entry.title}</p>
-                        <div className="flex items-center gap-3 mt-1.5">
+                        <p className="font-bold text-sm truncate group-hover:text-primary transition-colors">{entry.title || 'Untitled'}</p>
+                        <div className="flex items-center gap-3 mt-1.5 flex-wrap">
                             <span className="text-xs text-textLight flex items-center gap-1">
-                                <Calendar className="w-3 h-3" /> {new Date(entry.date).toLocaleDateString()}
+                                <Calendar className="w-3 h-3" /> {formatDate(entry.analyzed_at)}
                             </span>
-                            <span className="text-xs text-textLight">{entry.chars.toLocaleString()} chars</span>
+                            <span className="text-xs text-textLight flex items-center gap-1">
+                                <Clock className="w-3 h-3" /> {formatTime(entry.analyzed_at)}
+                            </span>
+                            {entry.pipeline?.chars_extracted > 0 && (
+                                <span className="text-xs text-textLight">{entry.pipeline.chars_extracted.toLocaleString()} chars</span>
+                            )}
+                            {entry.authors && entry.authors.length > 0 && (
+                                <span className="text-xs text-textLight flex items-center gap-1 truncate max-w-[200px]">
+                                    <Users className="w-3 h-3 shrink-0" /> {entry.authors.slice(0, 2).join(', ')}{entry.authors.length > 2 ? ` +${entry.authors.length - 2}` : ''}
+                                </span>
+                            )}
                         </div>
                     </div>
                     <button
