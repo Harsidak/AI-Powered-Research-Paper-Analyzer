@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, File, CheckCircle2, AlertCircle, Loader2, Shield, Brain, GitMerge } from 'lucide-react';
+import { Upload, File, CheckCircle2, AlertCircle, Loader2, Shield, Brain, GitMerge, FilePlus } from 'lucide-react';
 import type { AnalysisResult } from '../App';
 
 interface UploadDropzoneProps {
@@ -79,7 +79,7 @@ export default function UploadDropzone({ onAnalysisComplete }: UploadDropzonePro
     const currentStage = stageLabels[stage];
 
     return (
-        <div className="surface-neu w-full h-full min-h-[420px] flex flex-col p-8 relative overflow-hidden">
+        <div className="surface-neu w-full h-full min-h-[460px] flex flex-col p-12 relative overflow-hidden">
 
             {/* Decorative gradient orbs */}
             <div className="absolute top-0 right-0 w-72 h-72 rounded-full blur-[80px] -mr-24 -mt-24 pointer-events-none opacity-30" style={{ background: 'var(--gradient-primary)' }} />
@@ -93,15 +93,15 @@ export default function UploadDropzone({ onAnalysisComplete }: UploadDropzonePro
                 onDrop={handleDrop}
             >
                 {!file ? (
-                    <div className="flex flex-col items-center animate-fade-in">
-                        <div className={`glass-icon glass-icon-xl glass-blue mb-6 transition-all duration-500
+                    <div className="flex flex-col items-center animate-fade-in stagger-children">
+                        <div className={`glass-icon glass-icon-xl glass-blue mb-8 transition-all duration-500
                             ${isDragging ? 'scale-110 animate-float' : ''}`}>
-                            <Upload className={`w-9 h-9 transition-colors duration-300 ${isDragging ? 'text-blue-400' : 'text-blue-300/60'}`} />
+                            <Upload className={`w-10 h-10 transition-colors duration-300 ${isDragging ? 'text-blue-400' : 'text-blue-300/60'}`} />
                         </div>
-                        <h3 className="text-xl font-bold mb-1.5">Drag & Drop PDF</h3>
-                        <p className="text-sm text-textLight mb-7">or click to browse local files</p>
-                        <button onClick={() => fileInputRef.current?.click()} className="btn-primary text-sm">
-                            Select Document
+                        <h3 className="text-2xl font-bold mb-2">Drag & Drop PDF</h3>
+                        <p className="text-sm text-textLight mb-8">or click to browse local files</p>
+                        <button onClick={() => fileInputRef.current?.click()} className="btn-primary text-sm flex items-center gap-2 px-6 py-3 font-semibold group">
+                            <FilePlus className="w-5 h-5 group-hover:scale-110 transition-transform" /> Select Document
                         </button>
                         <input type="file" ref={fileInputRef} className="hidden" accept="application/pdf" onChange={handleFileSelect} />
                     </div>

@@ -105,6 +105,16 @@ export default function KnowledgeGraphView() {
         setHighlightNodes(matching);
     }, [searchQuery, graphData]);
 
+    // Tune D3 physics for better node spacing
+    useEffect(() => {
+        if (graphRef.current && graphData) {
+            // Increase repulsion
+            graphRef.current.d3Force('charge').strength(-400).distanceMax(800);
+            // Increase link distance
+            graphRef.current.d3Force('link').distance(80);
+        }
+    }, [graphData]);
+
     const handleNodeClick = useCallback((node: GraphNode) => {
         setSelectedNode(node);
         // Zoom to node
@@ -254,16 +264,24 @@ export default function KnowledgeGraphView() {
                         ctx.stroke();
                         ctx.globalAlpha = 1;
 
-                        // Label (only when zoomed in enough)
-                        if (globalScale > 1.5 || isSelected || n.degree >= 4) {
+                        // Label text with background outline for legibility
+                        if (globalScale > 1.2 || isSelected || n.degree >= 3) {
                             const label = n.label;
-                            const fontSize = Math.max(10 / globalScale, 2.5);
+                            const fontSize = Math.max(10 / globalScale, 3);
                             ctx.font = `600 ${fontSize}px Inter, sans-serif`;
                             ctx.textAlign = 'center';
                             ctx.textBaseline = 'middle';
-                            ctx.globalAlpha = isHighlighted ? 0.9 : 0.12;
-                            ctx.fillStyle = 'var(--text-main, #e2e8f0)';
-                            ctx.fillText(label, node.x!, node.y! + size + fontSize + 1);
+
+                            const textY = node.x && node.y ? node.y + size + fontSize + 2 : (node.y || 0);
+
+                            // Text stroke (outline) to cut through links
+                            ctx.lineWidth = 4 / globalScale;
+                            ctx.strokeStyle = 'rgba(244, 247, 252, 0.9)'; // Match body background approximately
+                            ctx.strokeText(label, node.x!, textY);
+
+                            ctx.globalAlpha = isHighlighted ? 0.9 : 0.15;
+                            ctx.fillStyle = isHighlighted ? 'var(--text-main, #334155)' : 'var(--text-light, #94a3b8)';
+                            ctx.fillText(label, node.x!, textY);
                             ctx.globalAlpha = 1;
                         }
                     }}
