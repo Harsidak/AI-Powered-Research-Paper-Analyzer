@@ -180,16 +180,15 @@ async def upload_and_analyze(
         df = statistical_compute.format_matrix(raw_json)
         matrix_shape = list(df.shape) if not df.empty else [0, 0]
 
-        # 4. Cognee GraphRAG (non-blocking — failure doesn't crash pipeline)
-        logger.info("Running Cognee ECL Pipeline...")
-        cognee_success = False
+        # 4. Knowledge Graph (single LLM call — non-blocking, failure doesn't crash pipeline)
+        logger.info("Extracting knowledge graph triplets...")
+        graph_result = {"success": False}
         try:
-            cognee_success = await relational_builder.build_knowledge_graph(
-                raw_text=extracted_text,
-                document_title=paper_title or "Unknown Document"
+            graph_result = relational_builder.build_knowledge_graph(
+                structured_data=raw_json
             )
-        except Exception as cognee_err:
-            logger.warning(f"Cognee skipped: {cognee_err}")
+        except Exception as graph_err:
+            logger.warning(f"Knowledge graph skipped: {graph_err}")
 
         # Store in memory for MathBot chat context
         _last_analysis = {
@@ -206,7 +205,10 @@ async def upload_and_analyze(
             "pipeline": {
                 "chars_extracted": len(extracted_text),
                 "matrix_shape": matrix_shape,
-                "cognee_success": cognee_success,
+                "cognee_success": graph_result.get("success", False),
+                "graph_triplets": graph_result.get("triplet_count", 0),
+                "graph_nodes": graph_result.get("node_count", 0),
+                "graph_edges": graph_result.get("edge_count", 0),
             },
             "extracted_data": raw_json
         }

@@ -1,5 +1,5 @@
 import logging
-import asyncio
+import os
 from app.core.celery_app import celery_app
 from app.services.mineru_extractor import MinerUExtractor
 from app.services.lang_extract_engine import run_lang_extract_pipeline
@@ -68,19 +68,16 @@ def process_pdf_extraction(self, task_id: str, file_path: str, user_id: str):
         df = statistical_compute.format_matrix(raw_json)
         logger.info(f"[{task_id}] Pandas Matrix Created: {df.shape if not df.empty else 'Empty'}")
         
-        # 3. Relational Path (Cognee GraphRAG)
-        logger.info(f"[{task_id}] Running Cognee ECL Pipeline to Neo4j/LanceDB...")
+        # 3. Relational Path (Direct LLM Triplet Extraction → NetworkX)
+        logger.info(f"[{task_id}] Extracting knowledge graph triplets...")
         if self:
             self.update_state(state="PROGRESS", meta={"status": "BUILDING_GRAPH", "progress": 80})
         update_db_task(task_id, "BUILDING_GRAPH", 80.0)
         
-        # Run the async Cognee builder inside the sync celery thread
-        # Note: In a true prod env with heavy concurrency, we'd want a separate async worker queue
-        asyncio.run(relational_builder.build_knowledge_graph(
-            raw_text=extracted_text, 
-            document_title=paper_title
-        ))
-        logger.info(f"[{task_id}] Knowledge Graph Built Successfully.")
+        # Single LLM call to extract triplets from structured data
+        graph_result = relational_builder.build_knowledge_graph(structured_data=raw_json)
+        logger.info(f"[{task_id}] Knowledge Graph: {graph_result.get('triplet_count', 0)} triplets, "
+                     f"{graph_result.get('node_count', 0)} nodes, {graph_result.get('edge_count', 0)} edges.")
         
         if self:
             self.update_state(state="SUCCESS", meta={"status": "COMPLETE", "progress": 100})

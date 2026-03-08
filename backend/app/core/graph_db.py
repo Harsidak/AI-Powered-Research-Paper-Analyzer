@@ -44,5 +44,28 @@ class GraphMemoryManager:
         logger.info(f"Querying graph for contradictions regarding {target_concept}")
         return []
 
+    def get_graph_summary(self) -> dict:
+        """
+        Returns a summary of the current graph state: node/edge counts and sample edges.
+        Useful for verification and later for RAG context injection.
+        """
+        node_count = self.graph.number_of_nodes()
+        edge_count = self.graph.number_of_edges()
+
+        # Grab a sample of edges for inspection
+        sample_edges = []
+        for u, v, data in list(self.graph.edges(data=True))[:10]:
+            sample_edges.append({
+                "subject": u,
+                "predicate": data.get("relation", "UNKNOWN"),
+                "object": v,
+            })
+
+        return {
+            "node_count": node_count,
+            "edge_count": edge_count,
+            "sample_edges": sample_edges,
+        }
+
 # Singleton instance to be used by the Celery worker and the API
 memory_manager = GraphMemoryManager()
